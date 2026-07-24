@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>ZenGeos - 47都道府県マスター スマホ縦置き版</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=MURECHO:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@600;700;800&family=Outfit:wght@700;800;900&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Canvas Confetti CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['MURECHO', 'Plus Jakarta Sans', 'sans-serif'],
+                        display: ['Outfit', 'MURECHO', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        body {
+            font-family: 'MURECHO', sans-serif;
+            background: linear-gradient(165deg, #e0f2fe 0%, #f0fdf4 50%, #fef3c7 100%);
+            background-attachment: fixed;
+            user-select: none;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        /* スマホ専用縦置き枠 ＆ 上下30px余白の配置 */
+        .mobile-container {
+            width: 100%;
+            max-width: 440px;
+            min-height: 100vh;
+            padding-top: 30px;
+            padding-bottom: 30px;
+            padding-left: 12px;
+            padding-right: 12px;
+            box-sizing: border-box;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        /* Light Glassmorphism Panel */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.88);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 8px 24px -4px rgba(14, 165, 233, 0.12), 0 4px 6px -2px rgba(0, 0, 0, 0.03);
+        }
+
+        /* SVG Map Interactive Styling */
+        .pref-path {
+            transition: all 0.15s ease-out;
+            cursor: pointer;
+            stroke-width: 1.5;
+            stroke-linejoin: round;
+            stroke-linecap: round;
+        }
+
+        .pref-group:active .pref-path,
+        .pref-group:hover .pref-path {
+            fill: #38bdf8 !important;
+            stroke: #0284c7 !important;
+            stroke-width: 2.5;
+            filter: drop-shadow(0px 4px 10px rgba(56, 189, 248, 0.5));
+        }
+
+        .pref-path.correct-flash {
+            fill: #10b981 !important;
+            stroke: #047857 !important;
+            filter: drop-shadow(0px 0px 14px rgba(16, 185, 129, 0.9));
+        }
+
+        .pref-path.wrong-flash {
+            fill: #f43f5e !important;
+            stroke: #be123c !important;
+            filter: drop-shadow(0px 0px 14px rgba(244, 63, 94, 0.9));
+        }
+
+        .pref-label {
+            pointer-events: none;
+            font-weight: 800;
+            fill: #0f172a;
+            text-anchor: middle;
+            dominant-baseline: central;
+            font-size: 11px;
+            text-shadow: 0px 0px 4px rgba(255, 255, 255, 0.95), 0px 0px 6px rgba(255, 255, 255, 0.95);
+        }
+
+        #japan-map-svg {
+            transition: viewBox 0.35s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        /* Custom Mobile Scrollbar */
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #38bdf8;
+            border-radius: 4px;
+        }
+
+        .badge-locked {
+            filter: grayscale(1);
+            opacity: 0.45;
+        }
+    </style>
+</head>
+<body class="selection:bg-emerald-200">
+
+    <!-- スマホ縦置きディスプレイ可能エリア (上下30px余白配置) -->
+    <div class="mobile-container">
+
+        <!-- スマホ上部 ヘッダー＆ステータスバー -->
+        <header class="glass-panel p-3 rounded-2xl mb-2.5 shadow-sm">
+            <div class="flex items-center justify-between gap-2">
+                <!-- App Title & Icon -->
+                <div class="flex items-center space-x-2" onclick="switchTab('map')">
+                    <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-400 to-sky-500 text-white flex items-center justify-center shadow-sm text-base">
+                        <i class="fa-solid fa-map-location-dot"></i>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-black font-display bg-gradient-to-r from-emerald-600 to-sky-600 bg-clip-text text-transparent leading-none">
+                            ZenGeos
+                        </h1>
+                        <span class="text-[9px] font-extrabold text-slate-400">47都道府県マスター</span>
+                    </div>
+                </div>
+
+                <!-- Gamification Quick Stats -->
+                <div class="flex items-center space-x-2">
+                    <!-- Lv & EXP -->
+                    <div class="flex items-center space-x-1.5 bg-slate-100/90 px-2 py-1 rounded-xl border border-slate-200">
+                        <span id="player-level" class="text-xs font-black text-amber-600">Lv.1</span>
+                        <div class="w-12 bg-slate-200 rounded-full h-1.5 overflow-hidden">
+                            <div id="exp-bar" class="bg-emerald-500 h-full transition-all duration-300" style="width: 0%"></div>
+                        </div>
+                    </div>
+
+                    <!-- Score & Sound -->
+                    <div id="score-display" class="text-xs font-black text-emerald-600 bg-emerald-50 px-2 py-1 rounded-xl border border-emerald-200">
+                        0 pts
+                    </div>
+                    <button id="sound-btn" onclick="toggleSound()" class="w-7 h-7 bg-slate-100 rounded-xl flex items-center justify-center text-slate-600 active:scale-90 transition border border-slate-200">
+                        <i id="sound-icon" class="fa-solid fa-volume-high text-xs text-emerald-500"></i>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- MAIN SCREEN CONTENT AREA -->
+        <main class="flex-grow flex flex-col justify-between overflow-y-auto pb-2">
+
+            <!-- TAB 1: スマホ位置当てテスト (SVG日本地図) -->
+            <section id="tab-map" class="space-y-2.5 flex-grow flex flex-col justify-between">
+                
+                <!-- Game Control Banner -->
+                <div class="glass-panel p-3 rounded-2xl flex items-center justify-between gap-2 shadow-xs">
+                    <div class="flex items-center space-x-2.5 min-w-0">
+                        <div class="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-400 to-rose-400 text-white flex items-center justify-center text-lg font-black shadow-xs shrink-0">
+                            🎯
+                        </div>
+                        <div class="min-w-0">
+                            <div class="flex items-center space-x-1">
+                                <span class="text-[9px] font-black text-slate-400">位置テスト</span>
+                                <span id="map-timer-badge" class="hidden text-[9px] font-black px-1.5 py-0.2 rounded-full bg-rose-100 text-rose-700">⏱️ 60s</span>
+                            </div>
+                            <h2 id="map-target-prompt" class="text-sm font-black text-slate-800 truncate">
+                                下のスタートボタンを押して挑戦！
+                            </h2>
+                        </div>
+                    </div>
+
+                    <!-- Mode Buttons -->
+                    <div class="flex items-center space-x-1 shrink-0">
+                        <button id="map-start-btn" onclick="startMapQuiz('normal')" class="px-3 py-2 bg-emerald-500 active:bg-emerald-600 text-white font-extrabold rounded-xl shadow-xs text-xs flex items-center space-x-1">
+                            <i class="fa-solid fa-play text-[10px]"></i>
+                            <span>スタート</span>
+                        </button>
+                        <button id="map-speed-btn" onclick="startMapQuiz('speed')" class="px-2.5 py-2 bg-gradient-to-r from-rose-500 to-amber-500 active:scale-95 text-white font-extrabold rounded-xl shadow-xs text-xs">
+                            ⚡秒速
+                        </button>
+                        <button id="map-hint-btn" onclick="showMapHint()" class="hidden px-2.5 py-2 bg-amber-100 text-amber-900 font-extrabold rounded-xl text-xs border border-amber-300">
+                            💡
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Hint Box -->
+                <div id="hint-box" class="hidden glass-panel bg-amber-50 p-2.5 rounded-xl text-amber-950 text-xs font-bold shadow-xs">
+                    <i class="fa-solid fa-lightbulb text-amber-500 mr-1"></i><span id="hint-text"></span>
+                </div>
+
+                <!-- スマホ縦置き表示用 SVG 地図ビューポート (縦画面にフィット) -->
+                <div class="glass-panel p-2 rounded-2xl flex flex-col items-center relative overflow-hidden flex-grow justify-between">
+                    
+                    <!-- 地方選択横スクロールタブ (スマホで押しやすい) -->
+                    <div class="w-full flex overflow-x-auto gap-1 py-1 no-scrollbar text-[11px] font-extrabold z-10">
+                        <button onclick="zoomToRegion('ALL')" class="zoom-btn active whitespace-nowrap px-2.5 py-1 rounded-full bg-slate-800 text-white shadow-xs">全地域</button>
+                        <button onclick="zoomToRegion('東北')" class="zoom-btn whitespace-nowrap px-2.5 py-1 rounded-full bg-indigo-500 text-white shadow-xs">東北</button>
+                        <button onclick="zoomToRegion('関東')" class="zoom-btn whitespace-nowrap px-2.5 py-1 rounded-full bg-emerald-500 text-white shadow-xs">関東</button>
+                        <button onclick="zoomToRegion('中部')" class="zoom-btn whitespace-nowrap px-2.5 py-1 rounded-full bg-teal-500 text-white shadow-xs">中部</button>
+                        <button onclick="zoomToRegion('近畿')" class="zoom-btn whitespace-nowrap px-2.5 py-1 rounded-full bg-amber-500 text-white shadow-xs">近畿</button>
+                        <button onclick="zoomToRegion('中国')" class="zoom-btn whitespace-nowrap px-2.5 py-1 rounded-full bg-rose-500 text-white shadow-xs">中国・四国</button>
+                        <button onclick="zoomToRegion('九州')" class="zoom-btn whitespace-nowrap px-2.5 py-1 rounded-full bg-purple-500 text-white shadow-xs">九州・沖縄</button>
+                    </div>
+
+                    <!-- Map Sub Toolbar -->
+                    <div class="w-full flex justify-between items-center bg-white/90 px-3 py-1 rounded-xl border border-slate-200 text-[10px] font-bold mb-1 z-10">
+                        <button id="toggle-label-btn" onclick="toggleMapLabels()" class="px-2 py-1 rounded-lg bg-slate-100 text-slate-700 flex items-center space-x-1 border border-slate-200">
+                            <i id="toggle-label-icon" class="fa-solid fa-eye-slash text-slate-400"></i>
+                            <span id="toggle-label-text">県名非表示</span>
+                        </button>
+
+                        <div class="flex items-center space-x-1">
+                            <button onclick="manualZoom(1.25)" class="w-7 h-7 bg-slate-100 text-slate-700 font-black rounded-lg flex items-center justify-center text-xs border border-slate-200">＋</button>
+                            <button onclick="manualZoom(0.8)" class="w-7 h-7 bg-slate-100 text-slate-700 font-black rounded-lg flex items-center justify-center text-xs border border-slate-200">－</button>
+                            <button onclick="zoomToRegion('ALL')" class="w-7 h-7 bg-slate-100 text-slate-700 font-black rounded-lg flex items-center justify-center text-[10px] border border-slate-200"><i class="fa-solid fa-rotate-left"></i></button>
+                        </div>
+                    </div>
+
+                    <!-- SVG Japan Vector Map Area (スマホ縦アスペクト比) -->
+                    <div class="w-full aspect-[4/5] relative flex items-center justify-center bg-gradient-to-b from-sky-100/60 via-sky-50/40 to-indigo-50/40 rounded-xl border border-sky-100 shadow-inner overflow-hidden">
+                        <svg id="japan-map-svg" viewBox="0 0 1000 850" class="w-full h-full drop-shadow-sm touch-pan-x touch-pan-y">
+                            <path d="M 20 730 L 220 730 L 220 840" stroke="#94a3b8" stroke-width="2" stroke-dasharray="4 4" fill="none" />
+                            <text x="30" y="748" fill="#64748b" font-size="12" font-weight="extrabold">沖縄県</text>
+                            
+                            <g id="map-prefectures"></g>
+                        </svg>
+                    </div>
+
+                    <!-- Toast Info Panel -->
+                    <div id="map-info-card" class="mt-1.5 glass-panel px-3 py-2 rounded-xl text-center w-full hidden transition-all">
+                        <div id="info-pref-region" class="text-[10px] font-bold text-emerald-600">地方</div>
+                        <div id="info-pref-name" class="text-base font-black text-slate-800">都道府県名</div>
+                        <div id="info-pref-capital" class="text-xs font-extrabold text-slate-500">県庁所在地: ---</div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 2: スマホ用4択クイズ -->
+            <section id="tab-quiz" class="hidden space-y-3 flex-grow flex flex-col justify-between">
+                <div class="glass-panel rounded-2xl shadow-sm border border-white/80 overflow-hidden flex-grow flex flex-col justify-between">
+                    
+                    <!-- Timer Bar -->
+                    <div class="w-full bg-slate-100 h-1.5">
+                        <div id="quiz-timer-bar" class="bg-gradient-to-r from-emerald-400 via-sky-400 to-rose-400 h-full w-full"></div>
+                    </div>
+
+                    <!-- Question Header -->
+                    <div class="px-4 py-2 border-b border-slate-100 flex justify-between items-center bg-white/50">
+                        <span class="text-[11px] font-black text-slate-400" id="quiz-count-label">第 1 問</span>
+                        <div class="flex items-center space-x-1.5">
+                            <span class="text-[10px] font-black text-slate-500">連続正解:</span>
+                            <span id="quiz-streak" class="text-xs font-black text-amber-500 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200">
+                                🔥 0
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Question Area -->
+                    <div class="p-4 space-y-3 flex-grow flex flex-col justify-between">
+                        <div class="space-y-1">
+                            <span id="quiz-category-badge" class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
+                                🏢 県庁所在地クイズ
+                            </span>
+                            <h3 id="quiz-question-text" class="text-base font-black text-slate-800 leading-snug">
+                                クイズを読み込んでいます...
+                            </h3>
+                        </div>
+
+                        <!-- Visual Box -->
+                        <div id="quiz-visual-box" class="hidden flex flex-col justify-center items-center p-3 bg-sky-50 rounded-xl border border-slate-200 text-center">
+                            <span id="quiz-visual-content" class="text-3xl font-black text-emerald-600">❓</span>
+                        </div>
+
+                        <!-- Options List (スマホでタップしやすい大型ボタン) -->
+                        <div id="quiz-options-container" class="space-y-2 pt-1">
+                            <!-- Buttons injected via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Feedback Footer -->
+                    <div id="quiz-feedback-box" class="hidden px-4 py-3 border-t border-slate-100 text-center font-bold bg-slate-50/90">
+                        <p id="quiz-feedback-text" class="text-sm mb-2"></p>
+                        <button onclick="nextQuizQuestion()" class="w-full py-2.5 bg-slate-800 active:bg-black text-white font-extrabold rounded-xl text-xs transition shadow-sm">
+                            次の問題へ <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- TAB 3: スマホ用47都道府県図鑑 -->
+            <section id="tab-book" class="hidden space-y-2.5 flex-grow">
+                <!-- Search & Filter Bar -->
+                <div class="glass-panel p-2.5 rounded-2xl border border-white/80 space-y-2">
+                    <div class="relative w-full">
+                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 text-xs"></i>
+                        <input type="text" id="book-search" oninput="renderBook()" placeholder="検索 (都道府県名・県庁所在地・特産)..." 
+                               class="w-full pl-9 pr-3 py-2 bg-white/90 border border-slate-200 rounded-xl text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 font-bold">
+                    </div>
+
+                    <!-- Region Scroll Badges -->
+                    <div class="flex overflow-x-auto gap-1 no-scrollbar text-[10px] font-extrabold py-0.5">
+                        <button onclick="filterRegion('ALL')" class="region-filter-btn active whitespace-nowrap px-3 py-1 rounded-lg bg-emerald-600 text-white">すべて</button>
+                        <button onclick="filterRegion('北海道')" class="region-filter-btn whitespace-nowrap px-3 py-1 rounded-lg bg-white text-slate-600 border border-slate-200">東北</button>
+                        <button onclick="filterRegion('関東')" class="region-filter-btn whitespace-nowrap px-3 py-1 rounded-lg bg-white text-slate-600 border border-slate-200">関東</button>
+                        <button onclick="filterRegion('中部')" class="region-filter-btn whitespace-nowrap px-3 py-1 rounded-lg bg-white text-slate-600 border border-slate-200">中部</button>
+                        <button onclick="filterRegion('近畿')" class="region-filter-btn whitespace-nowrap px-3 py-1 rounded-lg bg-white text-slate-600 border border-slate-200">近畿</button>
+                        <button onclick="filterRegion('中国')" class="region-filter-btn whitespace-nowrap px-3 py-1 rounded-lg bg-white text-slate-600 border border-slate-200">中四国</button>
+                        <button onclick="filterRegion('九州')" class="region-filter-btn whitespace-nowrap px-3 py-1 rounded-lg bg-white text-slate-600 border border-slate-200">九州沖縄</button>
+                    </div>
+                </div>
+
+                <!-- Prefecture Cards Grid -->
+                <div id="book-grid" class="grid grid-cols-2 gap-2 max-h-[52vh] overflow-y-auto pr-0.5">
+                    <!-- Cards injected via JS -->
+                </div>
+            </section>
+
+            <!-- TAB 4: 実績バッジ -->
+            <section id="tab-badges" class="hidden space-y-3 flex-grow">
+                <div class="glass-panel p-3 rounded-2xl text-center">
+                    <h3 class="text-base font-black text-slate-800 font-display">🏆 実績コレクション</h3>
+                    <p class="text-[10px] font-bold text-slate-500">条件を達成してバッジを集めよう！</p>
+                </div>
+
+                <div id="badges-grid" class="grid grid-cols-2 gap-2 max-h-[54vh] overflow-y-auto">
+                    <!-- Badges injected via JS -->
+                </div>
+            </section>
+
+        </main>
+
+        <!-- スマホ用ボトムナビゲーションバー (押しやすい下部配置) -->
+        <nav class="glass-panel rounded-2xl p-1 shadow-sm mt-1">
+            <div class="flex justify-around text-[10px] font-black">
+                <button id="nav-map" onclick="switchTab('map')" class="nav-btn flex-1 py-1.5 px-1 rounded-xl text-emerald-700 bg-emerald-50 border border-emerald-200 flex flex-col items-center justify-center space-y-0.5">
+                    <i class="fa-solid fa-earth-japan text-sm text-emerald-600"></i>
+                    <span>地図テスト</span>
+                </button>
+                <button id="nav-quiz" onclick="switchTab('quiz')" class="nav-btn flex-1 py-1.5 px-1 rounded-xl text-slate-500 flex flex-col items-center justify-center space-y-0.5">
+                    <i class="fa-solid fa-pen-to-square text-sm text-sky-500"></i>
+                    <span>4択クイズ</span>
+                </button>
+                <button id="nav-book" onclick="switchTab('book')" class="nav-btn flex-1 py-1.5 px-1 rounded-xl text-slate-500 flex flex-col items-center justify-center space-y-0.5">
+                    <i class="fa-solid fa-book-open text-sm text-indigo-500"></i>
+                    <span>47図鑑</span>
+                </button>
+                <button id="nav-badges" onclick="switchTab('badges')" class="nav-btn flex-1 py-1.5 px-1 rounded-xl text-slate-500 flex flex-col items-center justify-center space-y-0.5">
+                    <i class="fa-solid fa-award text-sm text-amber-500"></i>
+                    <span>実績</span>
+                </button>
+            </div>
+        </nav>
+    </div>
+
+    <!-- DETAIL MODAL -->
+    <div id="pref-modal" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-3 hidden">
+        <div class="glass-panel bg-white/95 rounded-3xl max-w-sm w-full p-5 space-y-3 shadow-2xl relative border border-white max-h-[85vh] overflow-y-auto">
+            <button onclick="closeModal()" class="absolute top-4 right-4 w-8 h-8 bg-slate-100 rounded-full flex items-center justify-center text-slate-500 font-bold text-xs">
+                ✕
+            </button>
+            <div class="space-y-0.5">
+                <span id="modal-region" class="px-2.5 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-black rounded-lg border border-emerald-300">地方</span>
+                <h3 id="modal-title" class="text-2xl font-black text-slate-800 font-display">都道府県名</h3>
+            </div>
+
+            <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-1.5 text-xs">
+                <div class="flex justify-between items-center border-b border-slate-200 pb-1.5">
+                    <span class="font-bold text-slate-400">県庁所在地</span>
+                    <span id="modal-capital" class="font-black text-emerald-700 text-sm">---</span>
+                </div>
+                <div class="flex justify-between items-center border-b border-slate-200 pb-1.5">
+                    <span class="font-bold text-slate-400">テストポイント</span>
+                    <span id="modal-diff" class="font-bold text-amber-600">---</span>
+                </div>
+                <div class="flex justify-between items-center">
+                    <span class="font-bold text-slate-400">特産物</span>
+                    <span id="modal-goods" class="font-extrabold text-slate-700">---</span>
+                </div>
+            </div>
+
+            <div class="space-y-1">
+                <h4 class="text-[10px] font-black text-slate-400 uppercase">地理的特徴・解説</h4>
+                <p id="modal-desc" class="text-xs text-slate-700 leading-relaxed bg-emerald-50/70 p-3 rounded-xl border border-emerald-200 font-bold">
+                    説明...
+                </p>
+            </div>
+
+            <button onclick="closeModal()" class="w-full py-2.5 bg-emerald-500 text-white font-extrabold rounded-xl text-xs shadow-sm active:scale-95">
+                閉じる
+            </button>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- 47 PREFECTURES HIGH-PRECISION VECTOR DATASET ---
+        const prefectures = [
+            // 北海道・東北
+            { id: 1, name: "北海道", capital: "札幌市", region: "北海道", diff: false, goods: "じゃがいも, 生乳, スイートコーン", desc: "日本最大の面積。石狩平野での稲作、十勝平野での畑作、根釧台地での酪農が盛ん。", path: "M 740,240 C 725,255 715,268 710,278 C 722,286 732,286 740,282 L 752,280 C 765,292 788,294 810,280 L 835,252 C 865,252 892,248 912,242 C 938,228 958,212 962,208 C 948,188 942,185 940,182 C 955,152 962,142 960,138 C 935,128 920,128 918,128 C 895,112 882,108 878,108 C 842,112 822,118 818,120 C 788,135 778,142 775,142 C 762,160 748,180 745,182 C 752,200 758,212 760,222 Z M 715,265 C 728,252 740,256 742,258 L 748,278 C 732,288 722,288 718,288 Z", labelX: 830, labelY: 185, fill: "#e0e7ff", stroke: "#4f46e5" },
+            { id: 2, name: "青森県", capital: "青森市", region: "東北", diff: false, goods: "りんご, ごぼう, にんにく", desc: "りんごの生産量が全国1位（津軽平野）。世界自然遺産の白神山地（ブナの原生林）。", path: "M 730,320 C 740,312 752,308 755,308 C 760,318 765,328 768,332 C 778,318 784,312 788,312 C 795,322 798,332 795,338 C 788,355 782,368 780,372 L 735,368 C 730,352 728,336 730,320 Z", labelX: 760, labelY: 345, fill: "#e0e7ff", stroke: "#4f46e5" },
+            { id: 3, name: "岩手県", capital: "盛岡市", region: "東北", diff: true, goods: "わんこそば, 南部鉄器, 木材", desc: "面積は全国2位。リアス海岸（三陸海岸）は養殖業（ワカメ・カキ）や津波対策で有名。", path: "M 780,372 C 792,374 812,375 818,375 C 812,398 805,425 802,452 L 760,452 L 760,412 C 770,412 780,410 780,372 Z", labelX: 785, labelY: 410, fill: "#e0e7ff", stroke: "#4f46e5" },
+            { id: 4, name: "宮城県", capital: "仙台市", region: "東北", diff: true, goods: "ササニシキ, 仙台牛, 蒲鉾", desc: "東北地方の中心都市・仙台市（政令指定都市）。仙台平野は米どころ（ササニシキ・ひとめぼれ）。", path: "M 760,452 L 802,452 C 798,472 794,495 790,512 L 750,502 C 755,488 758,472 760,452 Z", labelX: 775, labelY: 478, fill: "#e0e7ff", stroke: "#4f46e5" },
+            { id: 5, name: "秋田県", capital: "秋田市", region: "東北", diff: false, goods: "あきたこまち, 比内地鶏, 杉", desc: "秋田平野での稲作（あきたこまち）。八郎潟の干拓地（大潟村）。日本一の高齢化率。", path: "M 735,368 L 780,372 C 775,392 765,410 760,412 L 760,452 L 725,442 C 728,418 730,392 735,368 Z", labelX: 748, labelY: 405, fill: "#e0e7ff", stroke: "#4f46e5" },
+            { id: 6, name: "山形県", capital: "山形市", region: "東北", diff: false, goods: "さくらんぼ, 西洋なし, 米", desc: "さくらんぼ（佐藤錦）生産全国1位。山形盆地など盆地が多く果樹栽培が盛ん。", path: "M 725,442 L 760,452 L 750,502 L 715,492 C 718,478 722,462 725,442 Z", labelX: 735, labelY: 470, fill: "#e0e7ff", stroke: "#4f46e5" },
+            { id: 7, name: "福島県", capital: "福島市", region: "東北", diff: false, goods: "もも, 会津塗, 赤べこ", desc: "もも生産量全国2位。会津盆地・中通り・浜通りの3地域で気候や産業が異なる。", path: "M 715,492 L 750,502 L 790,512 C 785,532 782,552 780,562 L 700,548 C 705,532 710,512 715,492 Z", labelX: 745, labelY: 530, fill: "#e0e7ff", stroke: "#4f46e5" },
+
+            // 関東
+            { id: 8, name: "茨城県", capital: "水戸市", region: "関東", diff: true, goods: "納豆, れんこん, ピーマン", desc: "近郊農業がとても盛ん。霞ヶ浦（日本で2番目に広い湖）がある。", path: "M 740,562 L 780,562 C 778,582 774,612 770,632 L 730,622 C 734,602 738,582 740,562 Z", labelX: 755, labelY: 592, fill: "#d1fae5", stroke: "#059669" },
+            { id: 9, name: "栃木県", capital: "宇都宮市", region: "関東", diff: true, goods: "いちご(とちおとめ), 餃子", desc: "いちご生産日本一。日光の社寺（世界遺産）や足尾銅山跡がある。", path: "M 700,548 L 740,562 L 730,622 L 690,602 C 694,582 697,565 700,548 Z", labelX: 715, labelY: 582, fill: "#d1fae5", stroke: "#059669" },
+            { id: 10, name: "群馬県", capital: "前橋市", region: "関東", diff: true, goods: "こんにゃくいも, キャベツ", desc: "嬬恋村でのキャベツ促成/高原野菜栽培。富岡製糸場（世界遺産）。「からっ風」。", path: "M 650,542 L 700,548 L 690,602 L 640,588 C 644,570 647,555 650,542 Z", labelX: 670, labelY: 572, fill: "#d1fae5", stroke: "#059669" },
+            { id: 11, name: "埼玉県", capital: "さいたま市", region: "関東", diff: true, goods: "深谷ねぎ, 草加せんべい", desc: "内陸県で人口が多い。近郊農業が発達。さいたま市は政令指定都市。", path: "M 660,602 L 730,622 L 720,652 L 650,638 C 653,625 657,612 660,602 Z", labelX: 685, labelY: 627, fill: "#d1fae5", stroke: "#059669" },
+            { id: 12, name: "千葉県", capital: "千葉市", region: "関東", diff: false, goods: "落花生, 醤油, ねぎ", desc: "落花生生産量が日本一。銚子港は水揚げトップ級。京葉工業地域。", path: "M 730,622 L 770,632 C 765,658 760,685 758,705 C 742,710 728,705 722,698 C 718,675 720,660 720,652 Z", labelX: 745, labelY: 662, fill: "#d1fae5", stroke: "#059669" },
+            { id: 13, name: "東京都", capital: "新宿区", region: "関東", diff: true, goods: "小松菜, 電子機器", desc: "日本の首都。人口密度が日本一。政治・経済の中心地。", path: "M 650,638 L 720,652 L 715,672 C 690,668 665,662 645,658 C 647,650 648,642 650,638 Z", labelX: 680, labelY: 654, fill: "#d1fae5", stroke: "#059669" },
+            { id: 14, name: "神奈川県", capital: "横浜市", region: "関東", diff: true, goods: "しゅうまい, 木工品", desc: "人口全国2位（約920万人）。横浜港、横須賀基地、京浜工業地帯。", path: "M 645,658 L 715,672 C 710,688 705,702 698,712 C 675,702 655,695 640,692 C 642,678 644,668 645,658 Z", labelX: 675, labelY: 682, fill: "#d1fae5", stroke: "#059669" },
+
+            // 中部
+            { id: 15, name: "新潟県", capital: "新潟市", region: "中部", diff: false, goods: "コシヒカリ, 錦鯉, 米菓", desc: "米（コシヒカリ）生産量トップクラス。越後平野、信濃川（日本最長の川）。", path: "M 660,452 L 725,442 L 715,492 L 710,522 L 700,548 L 650,542 L 635,502 Z M 625,445 C 632,438 642,438 648,445 C 648,455 638,460 625,455 Z", labelX: 675, labelY: 492, fill: "#ccfbf1", stroke: "#0d9488" },
+            { id: 16, name: "富山県", capital: "富山市", region: "中部", diff: false, goods: "チューリップ, 薬, ブリ", desc: "北陸工業地域。豊富な雪解け水で水力発電とアルミニウム工業・売薬が有名。", path: "M 570,502 C 592,492 618,495 635,502 L 620,542 L 565,538 C 567,525 568,512 570,502 Z", labelX: 595, labelY: 522, fill: "#ccfbf1", stroke: "#0d9488" },
+            { id: 17, name: "石川県", capital: "金沢市", region: "中部", diff: true, goods: "加賀野菜, 輪島塗, 金箔", desc: "能登半島が北へ突き出している。輪島塗や金箔などの伝統工芸。", path: "M 548,435 C 562,425 578,432 582,442 C 578,468 572,490 570,502 L 565,538 L 530,528 C 532,508 535,482 538,465 C 540,452 542,442 548,435 Z", labelX: 555, labelY: 485, fill: "#ccfbf1", stroke: "#0d9488" },
+            { id: 18, name: "福井県", capital: "福井市", region: "中部", diff: false, goods: "メガネフレーム, 越前ガニ", desc: "メガネフレーム生産シェア90%以上（鯖江市）。恐竜化石発掘量が日本一。", path: "M 510,532 L 530,528 L 565,538 L 540,582 C 518,575 502,568 495,568 C 500,555 505,542 510,532 Z", labelX: 525, labelY: 552, fill: "#ccfbf1", stroke: "#0d9488" },
+            { id: 19, name: "山梨県", capital: "甲府市", region: "中部", diff: true, goods: "ぶどう, もも, ジュエル", desc: "甲府盆地の扇状地で果樹栽培（ぶどう・もも全国1位）。富士山北側。", path: "M 620,612 L 660,602 L 650,638 L 610,632 C 613,625 617,618 620,612 Z", labelX: 635, labelY: 622, fill: "#ccfbf1", stroke: "#0d9488" },
+            { id: 20, name: "長野県", capital: "長野市", region: "中部", diff: false, goods: "レタス, りんご, 精密機械", desc: "内陸県で標高が高い。諏訪盆地の精密機械工業、野辺山高原での高原野菜。", path: "M 635,502 L 650,542 L 640,588 L 660,602 L 620,612 L 610,632 L 575,622 C 595,582 612,542 635,502 Z", labelX: 615, labelY: 572, fill: "#ccfbf1", stroke: "#0d9488" },
+            { id: 21, name: "岐阜県", capital: "岐阜市", region: "中部", diff: false, goods: "柿, 刃物, 陶磁器", desc: "世界遺産の白川郷合掌造り。関市の刃物、美濃焼。木曽三川（木曽・長良・揖斐）。", path: "M 565,538 L 620,542 L 575,622 L 525,612 C 538,588 552,562 565,538 Z", labelX: 570, labelY: 578, fill: "#ccfbf1", stroke: "#0d9488" },
+            { id: 22, name: "静岡県", capital: "静岡市", region: "中部", diff: false, goods: "お茶, みかん, ウナギ", desc: "お茶の生産量が全国1位（牧ノ原台地）。富士山、東海工業地域（バイク・楽器）。", path: "M 610,632 L 650,638 L 700,712 C 675,715 645,715 620,712 C 602,698 588,688 580,682 C 590,665 600,648 610,632 Z", labelX: 630, labelY: 672, fill: "#ccfbf1", stroke: "#0d9488" },
+            { id: 23, name: "愛知県", capital: "名古屋市", region: "中部", diff: true, goods: "自動車, キャベツ, 花き", desc: "製造品出荷額等が日本一の「中京工業地帯」の中心（豊田市の自動車産業）。", path: "M 525,612 L 575,622 L 580,682 C 565,688 548,688 535,685 C 525,675 520,652 525,612 Z", labelX: 550, labelY: 648, fill: "#ccfbf1", stroke: "#0d9488" },
+
+            // 近畿
+            { id: 24, name: "三重県", capital: "津市", region: "近畿", diff: true, goods: "松阪牛, 真珠, 伊勢エビ", desc: "志摩半島のリアス海岸で真珠養殖。四日市コンビナート（石油化学工業）。", path: "M 480,622 L 525,612 L 520,672 C 522,692 518,715 505,732 C 485,722 470,715 465,712 Z", labelX: 495, labelY: 672, fill: "#fef3c7", stroke: "#d97706" },
+            { id: 25, name: "滋賀県", capital: "大津市", region: "近畿", diff: true, goods: "近江牛, 信楽焼", desc: "日本最大の湖「琵琶湖」が面積の約6分の1を占める。近江盆地での稲作。", path: "M 465,572 L 510,532 L 525,612 L 475,608 C 470,595 466,582 465,572 Z", labelX: 490, labelY: 578, fill: "#fef3c7", stroke: "#d97706" },
+            { id: 26, name: "京都府", capital: "京都市", region: "近畿", diff: false, goods: "清酒, 宇治茶, 西陣織", desc: "千年の都。古都京都の文化財（世界遺産）。西陣織・清水焼などの伝統工芸。", path: "M 425,552 L 495,568 L 465,572 L 475,608 L 435,598 C 430,582 427,565 425,552 Z", labelX: 455, labelY: 572, fill: "#fef3c7", stroke: "#d97706" },
+            { id: 27, name: "大阪府", capital: "大阪市", region: "近畿", diff: false, goods: "たこ焼き, 商業, 薬品", desc: "西日本の経済の中心。「天下の台所」。阪神工業地帯の中心。関西国際空港。", path: "M 410,622 L 445,628 L 440,662 C 425,658 412,655 405,652 C 406,642 408,632 410,622 Z", labelX: 425, labelY: 640, fill: "#fef3c7", stroke: "#d97706" },
+            { id: 28, name: "兵庫県", capital: "神戸市", region: "近畿", diff: true, goods: "清酒, 淡路島玉ねぎ, 神戸牛", desc: "日本海と瀬戸内海の両方に面する。淡路島がある。神戸港。姫路城（世界遺産）。", path: "M 360,578 L 425,552 L 435,598 L 410,622 L 405,652 L 350,638 Z M 382,660 C 388,655 394,660 392,670 C 385,678 378,672 382,660 Z", labelX: 385, labelY: 602, fill: "#fef3c7", stroke: "#d97706" },
+            { id: 29, name: "奈良県", capital: "奈良市", region: "近畿", diff: false, goods: "柿, 筆, 墨", desc: "法隆寺地域の仏教建造物、古都奈良の文化財。奈良盆地に人口が集中。", path: "M 445,628 L 480,622 L 465,712 L 435,702 C 438,678 442,652 445,628 Z", labelX: 455, labelY: 662, fill: "#fef3c7", stroke: "#d97706" },
+            { id: 30, name: "和歌山県", capital: "和歌山市", region: "近畿", diff: false, goods: "みかん, うめ(南高梅), 柿", desc: "みかんとうめ（南高梅）生産全国1位。紀伊山地は雨が多く林業が盛ん。", path: "M 405,652 L 440,662 L 435,702 L 465,712 C 452,735 425,748 390,732 C 395,705 400,678 405,652 Z", labelX: 420, labelY: 702, fill: "#fef3c7", stroke: "#d97706" },
+
+            // 中国・四国
+            { id: 31, name: "鳥取県", capital: "鳥取市", region: "中国", diff: false, goods: "二十世紀梨, らっきょう", desc: "人口が日本で最も少ない県。鳥取砂丘でのらっきょう栽培や乾燥地農業。", path: "M 290,562 L 360,578 L 350,612 L 280,598 Z", labelX: 320, labelY: 588, fill: "#ffe4e6", stroke: "#e11d48" },
+            { id: 32, name: "島根県", capital: "松江市", region: "中国", diff: true, goods: "しじみ, 出雲そば", desc: "出雲大社や世界遺産の石見銀山遺跡。宍道湖（しんじこ）のヤマトシジミ。", path: "M 210,578 L 290,562 L 280,598 L 200,612 C 202,600 206,588 210,578 Z", labelX: 245, labelY: 588, fill: "#ffe4e6", stroke: "#e11d48" },
+            { id: 33, name: "岡山県", capital: "岡山市", region: "中国", diff: false, goods: "白桃, マスカット, ジーパン", desc: "「晴れの国」。水島コンビナート（瀬戸内工業地域）。果樹栽培（桃・ぶどう）。", path: "M 280,598 L 350,612 L 340,652 L 270,638 Z", labelX: 310, labelY: 622, fill: "#ffe4e6", stroke: "#e11d48" },
+            { id: 34, name: "広島県", capital: "広島市", region: "中国", diff: false, goods: "牡蠣, 自動車, レモン", desc: "カキ養殖全国1位。原爆ドームと厳島神社。マツダの本社があり自動車工業が盛ん。", path: "M 200,612 L 280,598 L 270,638 L 190,652 Z", labelX: 235, labelY: 622, fill: "#ffe4e6", stroke: "#e11d48" },
+            { id: 35, name: "山口県", capital: "山口市", region: "中国", diff: false, goods: "フグ, セメント, 夏みかん", desc: "本州の最西端。カルスト地形の秋吉台。周南市の石油化学コンビナート。", path: "M 130,628 L 200,612 L 190,652 L 120,668 C 122,652 125,640 130,628 Z", labelX: 160, labelY: 640, fill: "#ffe4e6", stroke: "#e11d48" },
+
+            { id: 36, name: "徳島県", capital: "徳島市", region: "四国", diff: false, goods: "すだち, なると金時", desc: "鳴門のうずしお。吉野川流域で栽培されるすだちや野菜。阿波踊り。", path: "M 280,712 L 340,702 L 325,752 L 270,742 Z", labelX: 305, labelY: 728, fill: "#ffe4e6", stroke: "#e11d48" },
+            { id: 37, name: "香川県", capital: "高松市", region: "四国", diff: true, goods: "讃岐うどん, オリーブ", desc: "日本で最も面積が小さい県。雨が少なくため池（満濃池）が多い。小豆島オリーブ。", path: "M 245,682 L 320,672 L 305,708 L 235,698 Z", labelX: 275, labelY: 690, fill: "#ffe4e6", stroke: "#e11d48" },
+            { id: 38, name: "愛媛県", capital: "松山市", region: "四国", diff: true, goods: "みかん, 今治タオル, 真珠", desc: "みかん生産量がトップクラス。今治市のタオル工業。リアス海岸での真珠養殖。", path: "M 175,702 L 245,682 L 235,738 C 210,735 185,728 165,722 Z", labelX: 205, labelY: 712, fill: "#ffe4e6", stroke: "#e11d48" },
+            { id: 39, name: "高知県", capital: "高知市", region: "四国", diff: false, goods: "ナス, ピーマン, カツオ", desc: "高知平野でのナスやピーマンの促成栽培（ビニールハウス）が超重要！四万十川。", path: "M 185,738 L 280,712 L 270,782 C 235,785 195,780 175,772 Z", labelX: 225, labelY: 752, fill: "#ffe4e6", stroke: "#e11d48" },
+
+            // 九州・沖縄
+            { id: 40, name: "福岡県", capital: "福岡市", region: "九州", diff: false, goods: "あまおう, 明太子, ラーメン", desc: "九州地方の中心。北九州工業地帯（官営八幡製鉄所）。アジアへの玄関口。", path: "M 70,658 L 125,648 L 115,698 L 60,688 Z", labelX: 92, labelY: 672, fill: "#f3e8ff", stroke: "#9333ea" },
+            { id: 41, name: "佐賀県", capital: "佐賀市", region: "九州", diff: false, goods: "海苔(有明海), 有田焼", desc: "有明海の干潟を利用したノリ養殖全国トップ。有田焼の伝統工芸。吉野ヶ里遺跡。", path: "M 20,678 L 70,658 L 60,708 L 10,698 Z", labelX: 40, labelY: 682, fill: "#f3e8ff", stroke: "#9333ea" },
+            { id: 42, name: "長崎県", capital: "長崎市", region: "九州", diff: false, goods: "カステラ, ビワ, 魚介類", desc: "島の数が日本一。造船業が盛ん。明治日本の産業革命遺産（端島・軍艦島）。", path: "M 10,698 L 60,708 L 45,762 L 5,748 Z M 15,652 A 5,5 0 1 1 25,652 A 5,5 0 1 1 15,652", labelX: 28, labelY: 728, fill: "#f3e8ff", stroke: "#9333ea" },
+            { id: 43, name: "熊本県", capital: "熊本市", region: "九州", diff: false, goods: "スイカ, トマト, いぐさ", desc: "世界級カルデラの阿蘇山。八代平野でのいぐさ栽培、熊本平野でのトマト・スイカ。", path: "M 60,688 L 115,698 L 100,762 L 50,748 Z", labelX: 80, labelY: 722, fill: "#f3e8ff", stroke: "#9333ea" },
+            { id: 44, name: "大分県", capital: "大分市", region: "九州", diff: false, goods: "かぼす, 干ししいたけ, 温泉", desc: "源泉数・湧出量が日本一の「温泉県」（別府・由布院）。大分臨海工業地域。", path: "M 115,698 C 135,688 152,688 160,688 L 145,748 L 100,738 Z", labelX: 130, labelY: 718, fill: "#f3e8ff", stroke: "#9333ea" },
+            { id: 45, name: "宮崎県", capital: "宮崎市", region: "九州", diff: false, goods: "マンゴー, ピーマン, ブロイラー", desc: "温暖な気候を利用したキュウリ・ピーマンの促成栽培やマンゴー。ブロイラー・肉牛。", path: "M 90,758 L 145,748 L 130,818 L 75,808 Z", labelX: 110, labelY: 782, fill: "#f3e8ff", stroke: "#9333ea" },
+            { id: 46, name: "鹿児島県", capital: "鹿児島市", region: "九州", diff: false, goods: "黒豚, さつまいも, 茶", desc: "桜島（活火山）。シラス台地が広がり、さつまいもや畜産業（黒豚・肉牛）が超盛ん。", path: "M 35,752 L 90,758 C 82,788 78,818 75,832 C 60,838 40,832 20,818 Z", labelX: 55, labelY: 788, fill: "#f3e8ff", stroke: "#9333ea" },
+            { id: 47, name: "沖縄県", capital: "那覇市", region: "九州", diff: true, goods: "さとうきび, パイナップル", desc: "日本唯一のア熱帯気候。サンゴ礁の美しい海。さとうきび生産。琉球王国のグスク。", path: "M 40,812 C 65,802 85,795 100,792 L 120,802 C 90,820 60,828 40,828 Z", labelX: 80, labelY: 810, fill: "#f3e8ff", stroke: "#9333ea" }
+        ];
+
+        // --- ACHIEVEMENTS DEFINITION ---
+        const achievementDefinitions = [
+            { id: 'first_win', name: '地理マスターの第一歩', desc: '初めて問題に正解する', icon: '🌱' },
+            { id: 'streak_5', name: 'フィーバーモード', desc: 'クイズで連続5問正解達成', icon: '🔥' },
+            { id: 'streak_10', name: '地理の達人', desc: 'クイズで連続10問正解達成', icon: '⚡' },
+            { id: 'speed_runner', name: 'スピードスター', desc: 'タイムアタックで10問以上正解', icon: '⏱️' },
+            { id: 'master_10', name: '10県制覇', desc: 'マスター度を10県以上にする', icon: '🗾' },
+            { id: 'master_47', name: '全国完全制覇', desc: '47都道府県すべてをマスター', icon: '👑' },
+            { id: 'level_5', name: 'ルーキー脱出', desc: 'プレイヤーレベル5に到達', icon: '🌟' },
+            { id: 'diff_master', name: '難関突破', desc: '県名と異なる県庁所在地クイズに3回正解', icon: '🎓' }
+        ];
+
+        // --- VIEWBOX PRESETS FOR REGION ZOOM ---
+        const regionViewBoxes = {
+            'ALL': '0 0 1000 850',
+            '東北': '600 80 400 500',
+            '関東': '600 520 200 220',
+            '中部': '480 420 260 300',
+            '近畿': '340 520 200 240',
+            '中国': '110 540 260 260',
+            '九州': '0 620 220 230'
+        };
+
+        // --- APP STATE ---
+        let currentViewBox = { x: 0, y: 0, w: 1000, h: 850 };
+        let score = 0;
+        let unlockedPrefs = new Set();
+        let unlockedBadges = new Set();
+        let level = 1;
+        let exp = 0;
+        let soundEnabled = true;
+
+        let mapQuizActive = false;
+        let mapQuizMode = 'normal'; // 'normal' | 'speed'
+        let mapTargetPref = null;
+        let speedTimeRemaining = 60;
+        let speedTimerInterval = null;
+        let speedCorrectCount = 0;
+
+        let currentQuizPref = null;
+        let quizStreak = 0;
+        let diffCorrectCount = 0;
+        let currentRegionFilter = 'ALL';
+        let showMapLabels = false;
+
+        // --- SOUND EFFECTS ---
+        function playSound(type) {
+            if (!soundEnabled) return;
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                if (type === 'correct') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+                    osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.08);
+                    osc.frequency.setValueAtTime(783.99, ctx.currentTime + 0.16);
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.4);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.4);
+                } else if (type === 'wrong') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, ctx.currentTime);
+                    osc.frequency.setValueAtTime(160, ctx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.2, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.25);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.25);
+                } else if (type === 'levelup') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(440, ctx.currentTime);
+                    osc.frequency.setValueAtTime(554.37, ctx.currentTime + 0.1);
+                    osc.frequency.setValueAtTime(659.25, ctx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.5);
+                }
+            } catch(e) {}
+        }
+
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const icon = document.getElementById('sound-icon');
+            if (soundEnabled) {
+                icon.className = 'fa-solid fa-volume-high text-xs text-emerald-500';
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-xs text-slate-400';
+            }
+        }
+
+        // --- LOCAL STORAGE DATA PERSISTENCE ---
+        function loadSavedState() {
+            try {
+                const saved = localStorage.getItem('zengeos_save_v1');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    score = data.score || 0;
+                    level = data.level || 1;
+                    exp = data.exp || 0;
+                    unlockedPrefs = new Set(data.unlockedPrefs || []);
+                    unlockedBadges = new Set(data.unlockedBadges || []);
+                    diffCorrectCount = data.diffCorrectCount || 0;
+                }
+            } catch(e) {}
+            updateStatusUI();
+        }
+
+        function saveState() {
+            try {
+                const data = {
+                    score,
+                    level,
+                    exp,
+                    unlockedPrefs: Array.from(unlockedPrefs),
+                    unlockedBadges: Array.from(unlockedBadges),
+                    diffCorrectCount
+                };
+                localStorage.setItem('zengeos_save_v1', JSON.stringify(data));
+            } catch(e) {}
+        }
+
+        function updateStatusUI() {
+            document.getElementById('score-display').textContent = `${score} pts`;
+            document.getElementById('player-level').textContent = `Lv.${level}`;
+            
+            const expNeeded = level * 100;
+            const expPct = Math.min(100, Math.floor((exp / expNeeded) * 100));
+            document.getElementById('exp-bar').style.width = `${expPct}%`;
+
+            renderBadges();
+        }
+
+        function addExp(pts) {
+            score += pts;
+            exp += pts;
+            const expNeeded = level * 100;
+            if (exp >= expNeeded) {
+                exp -= expNeeded;
+                level++;
+                playSound('levelup');
+                confetti({ particleCount: 80, spread: 60, origin: { y: 0.6 } });
+                checkAchievement('level_5');
+            }
+            updateStatusUI();
+            saveState();
+        }
+
+        function unlockPrefecture(id) {
+            if (!unlockedPrefs.has(id)) {
+                unlockedPrefs.add(id);
+                if (unlockedPrefs.size >= 10) checkAchievement('master_10');
+                if (unlockedPrefs.size >= 47) checkAchievement('master_47');
+                updateStatusUI();
+                saveState();
+            }
+        }
+
+        function checkAchievement(badgeId) {
+            if (!unlockedBadges.has(badgeId)) {
+                const def = achievementDefinitions.find(b => b.id === badgeId);
+                if (def) {
+                    unlockedBadges.add(badgeId);
+                    playSound('levelup');
+                    confetti({ particleCount: 70, spread: 50, origin: { y: 0.5 } });
+                    showMapToast(`🏆 実績！【${def.name}】`, 'bg-amber-500 text-white');
+                    updateStatusUI();
+                    saveState();
+                }
+            }
+        }
+
+        // --- INIT APP ---
+        window.addEventListener('DOMContentLoaded', () => {
+            loadSavedState();
+            renderMap();
+            renderBook();
+            setupNextQuiz();
+        });
+
+        // --- SVG MAP RENDERING ---
+        function renderMap() {
+            const svgG = document.getElementById('map-prefectures');
+            svgG.innerHTML = '';
+
+            prefectures.forEach(pref => {
+                const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+                g.setAttribute('class', 'pref-group cursor-pointer');
+                g.setAttribute('onclick', `handleMapClick(${pref.id})`);
+
+                const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+                path.setAttribute('d', pref.path);
+                path.setAttribute('fill', pref.fill);
+                path.setAttribute('stroke', pref.stroke);
+                path.setAttribute('id', `pref-path-${pref.id}`);
+                path.setAttribute('class', 'pref-path shadow-sm');
+
+                const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+                text.setAttribute('x', pref.labelX);
+                text.setAttribute('y', pref.labelY);
+                text.setAttribute('class', 'pref-label');
+                text.setAttribute('id', `pref-text-${pref.id}`);
+                text.textContent = showMapLabels ? pref.name.replace(/[都|府|県]/g, '') : '';
+
+                g.appendChild(path);
+                g.appendChild(text);
+                svgG.appendChild(g);
+            });
+        }
+
+        function toggleMapLabels() {
+            showMapLabels = !showMapLabels;
+            const btnText = document.getElementById('toggle-label-text');
+            const btnIcon = document.getElementById('toggle-label-icon');
+
+            if (showMapLabels) {
+                btnText.textContent = "県名表示中";
+                btnIcon.className = "fa-solid fa-eye text-emerald-600";
+            } else {
+                btnText.textContent = "県名非表示";
+                btnIcon.className = "fa-solid fa-eye-slash text-slate-400";
+            }
+
+            prefectures.forEach(p => {
+                const txtEl = document.getElementById(`pref-text-${p.id}`);
+                if (txtEl) {
+                    txtEl.textContent = showMapLabels ? p.name.replace(/[都|府|県]/g, '') : '';
+                }
+            });
+        }
+
+        function zoomToRegion(regionKey) {
+            document.querySelectorAll('.zoom-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
+
+            const viewBoxStr = regionViewBoxes[regionKey] || regionViewBoxes['ALL'];
+            const [x, y, w, h] = viewBoxStr.split(' ').map(Number);
+            
+            currentViewBox = { x, y, w, h };
+            document.getElementById('japan-map-svg').setAttribute('viewBox', `${x} ${y} ${w} ${h}`);
+        }
+
+        function manualZoom(factor) {
+            const svg = document.getElementById('japan-map-svg');
+            const newW = currentViewBox.w / factor;
+            const newH = currentViewBox.h / factor;
+
+            if (newW < 120 || newW > 1200) return;
+
+            const newX = currentViewBox.x + (currentViewBox.w - newW) / 2;
+            const newY = currentViewBox.y + (currentViewBox.h - newH) / 2;
+
+            currentViewBox = { x: newX, y: newY, w: newW, h: newH };
+            svg.setAttribute('viewBox', `${newX} ${newY} ${newW} ${newH}`);
+        }
+
+        // --- MAP TEST & SPEED RUN LOGIC ---
+        function startMapQuiz(mode) {
+            mapQuizActive = true;
+            mapQuizMode = mode;
+
+            document.getElementById('map-start-btn').classList.add('hidden');
+            document.getElementById('map-speed-btn').classList.add('hidden');
+            document.getElementById('map-hint-btn').classList.remove('hidden');
+
+            if (mode === 'speed') {
+                speedTimeRemaining = 60;
+                speedCorrectCount = 0;
+                document.getElementById('map-timer-badge').classList.remove('hidden');
+                document.getElementById('map-timer-badge').textContent = `⏱️ 60s`;
+
+                clearInterval(speedTimerInterval);
+                speedTimerInterval = setInterval(() => {
+                    speedTimeRemaining--;
+                    document.getElementById('map-timer-badge').textContent = `⏱️ ${speedTimeRemaining}s`;
+
+                    if (speedTimeRemaining <= 0) {
+                        clearInterval(speedTimerInterval);
+                        endSpeedRun();
+                    }
+                }, 1000);
+            }
+
+            pickNextMapTarget();
+        }
+
+        function pickNextMapTarget() {
+            const random = prefectures[Math.floor(Math.random() * prefectures.length)];
+            mapTargetPref = random;
+            
+            const promptText = mapQuizMode === 'speed' 
+                ? `⚡ 「<span class="text-rose-600 font-black text-base underline decoration-wavy decoration-rose-400">${mapTargetPref.name}</span>」はどこ？`
+                : `「<span class="text-emerald-600 font-black text-base underline decoration-wavy decoration-emerald-400">${mapTargetPref.name}</span>」をタップ！`;
+
+            document.getElementById('map-target-prompt').innerHTML = promptText;
+            document.getElementById('hint-box').classList.add('hidden');
+
+            // Auto focus region
+            let regionKey = 'ALL';
+            if (['北海道', '東北'].includes(mapTargetPref.region)) regionKey = '東北';
+            else if (['関東'].includes(mapTargetPref.region)) regionKey = '関東';
+            else if (['中部'].includes(mapTargetPref.region)) regionKey = '中部';
+            else if (['近畿'].includes(mapTargetPref.region)) regionKey = '近畿';
+            else if (['中国', '四国'].includes(mapTargetPref.region)) regionKey = '中国';
+            else if (['九州', '沖縄'].includes(mapTargetPref.region)) regionKey = '九州';
+
+            const viewBoxStr = regionViewBoxes[regionKey];
+            if (viewBoxStr) {
+                const [x, y, w, h] = viewBoxStr.split(' ').map(Number);
+                currentViewBox = { x, y, w, h };
+                document.getElementById('japan-map-svg').setAttribute('viewBox', viewBoxStr);
+            }
+        }
+
+        function showMapHint() {
+            if (!mapTargetPref) return;
+            const hintBox = document.getElementById('hint-box');
+            const hintText = document.getElementById('hint-text');
+            hintText.textContent = `ヒント: ${mapTargetPref.region}地方 (県庁: ${mapTargetPref.capital})`;
+            hintBox.classList.remove('hidden');
+        }
+
+        function handleMapClick(id) {
+            const pref = prefectures.find(p => p.id === id);
+
+            if (mapQuizActive && mapTargetPref) {
+                const pathEl = document.getElementById(`pref-path-${id}`);
+                if (id === mapTargetPref.id) {
+                    playSound('correct');
+                    checkAchievement('first_win');
+                    unlockPrefecture(id);
+
+                    if (mapQuizMode === 'speed') {
+                        speedCorrectCount++;
+                        addExp(40);
+                        showMapToast(`⚡ 大正解！【${pref.name}】 (+40 EXP)`, 'bg-emerald-500 text-white');
+                        if (speedCorrectCount >= 10) checkAchievement('speed_runner');
+                    } else {
+                        addExp(50);
+                        showMapToast(`🎉 正解！【 ${pref.name} 】（県庁: ${pref.capital}） (+50 EXP)`, 'bg-emerald-500 text-white');
+                    }
+
+                    if (pathEl) pathEl.classList.add('correct-flash');
+
+                    const txtEl = document.getElementById(`pref-text-${id}`);
+                    if (txtEl) txtEl.textContent = pref.name.replace(/[都|府|県]/g, '');
+
+                    setTimeout(() => {
+                        if (pathEl) pathEl.classList.remove('correct-flash');
+                        if (!showMapLabels && txtEl) txtEl.textContent = '';
+                        pickNextMapTarget();
+                    }, 900);
+                } else {
+                    playSound('wrong');
+                    showMapToast(`❌ そこは【 ${pref.name} 】だよ！`, 'bg-rose-500 text-white');
+                    if (pathEl) {
+                        pathEl.classList.add('wrong-flash');
+                        setTimeout(() => pathEl.classList.remove('wrong-flash'), 650);
+                    }
+                }
+            } else {
+                openModal(pref);
+            }
+        }
+
+        function endSpeedRun() {
+            mapQuizActive = false;
+            document.getElementById('map-start-btn').classList.remove('hidden');
+            document.getElementById('map-speed-btn').classList.remove('hidden');
+            document.getElementById('map-hint-btn').classList.add('hidden');
+            document.getElementById('map-timer-badge').classList.add('hidden');
+
+            confetti({ particleCount: 100, spread: 70 });
+            document.getElementById('map-target-prompt').innerHTML = `
+                🏁 正解数: <span class="text-rose-600 font-black text-lg">${speedCorrectCount}</span> 県！
+            `;
+        }
+
+        function showMapToast(msg, bgClass) {
+            const card = document.getElementById('map-info-card');
+            card.className = `mt-1.5 glass-panel px-3 py-2 rounded-xl text-center w-full font-extrabold text-xs ${bgClass} transition-all transform scale-105`;
+            card.innerHTML = msg;
+            card.classList.remove('hidden');
+        }
+
+        // --- 4択クイズ LOGIC ---
+        function setupNextQuiz() {
+            document.getElementById('quiz-feedback-box').classList.add('hidden');
+
+            const quizType = Math.floor(Math.random() * 4);
+            const target = prefectures[Math.floor(Math.random() * prefectures.length)];
+            currentQuizPref = target;
+
+            const categoryBadge = document.getElementById('quiz-category-badge');
+            const questionText = document.getElementById('quiz-question-text');
+            const visualBox = document.getElementById('quiz-visual-box');
+            const visualContent = document.getElementById('quiz-visual-content');
+
+            visualBox.classList.add('hidden');
+
+            let options = [target];
+            while (options.length < 4) {
+                const rand = prefectures[Math.floor(Math.random() * prefectures.length)];
+                if (!options.find(o => o.id === rand.id)) options.push(rand);
+            }
+            options.sort(() => Math.random() - 0.5);
+
+            if (quizType === 0) {
+                categoryBadge.textContent = "🏢 県庁所在地クイズ";
+                questionText.textContent = `「${target.name}」の県庁所在地はどこ？`;
+                renderQuizOptions(options, target, 'capital');
+            } else if (quizType === 1) {
+                categoryBadge.textContent = "🌾 特産品・地理特徴";
+                questionText.textContent = `「${target.goods.split(',')[0]}」などの特産を持つ都道府県は？`;
+                visualBox.classList.remove('hidden');
+                visualContent.textContent = target.name.charAt(0) + "❓";
+                renderQuizOptions(options, target, 'name');
+            } else if (quizType === 2) {
+                const diffOnly = prefectures.filter(p => p.diff);
+                const diffTarget = diffOnly[Math.floor(Math.random() * diffOnly.length)];
+                currentQuizPref = diffTarget;
+                categoryBadge.textContent = "⚠️ 重要！県名と異なる県庁所在地";
+                questionText.textContent = `「${diffTarget.name}」の県庁所在地はどれ？`;
+                
+                let diffOptions = [diffTarget];
+                while(diffOptions.length < 4) {
+                    const r = prefectures[Math.floor(Math.random() * prefectures.length)];
+                    if(!diffOptions.find(o => o.id === r.id)) diffOptions.push(r);
+                }
+                diffOptions.sort(() => Math.random() - 0.5);
+                renderQuizOptions(diffOptions, diffTarget, 'capital');
+            } else {
+                categoryBadge.textContent = "🧩 ヒント・地方判定";
+                questionText.textContent = `「${target.region}地方」で県庁が「${target.capital}」の都道府県は？`;
+                renderQuizOptions(options, target, 'name');
+            }
+
+            const timerBar = document.getElementById('quiz-timer-bar');
+            timerBar.style.width = '100%';
+        }
+
+        function renderQuizOptions(options, target, key) {
+            const container = document.getElementById('quiz-options-container');
+            container.innerHTML = '';
+
+            options.forEach(opt => {
+                const btn = document.createElement('button');
+                btn.className = "w-full p-3 bg-white/90 active:bg-emerald-50 border border-slate-200 rounded-xl font-extrabold text-slate-800 text-xs text-left transition flex items-center justify-between shadow-xs";
+                
+                const displayText = key === 'capital' ? opt.capital : opt.name;
+                btn.innerHTML = `
+                    <span>${displayText}</span>
+                    <i class="fa-solid fa-chevron-right text-slate-300 text-[10px]"></i>
+                `;
+
+                btn.onclick = () => checkQuizAnswer(opt, target, key);
+                container.appendChild(btn);
+            });
+        }
+
+        function checkQuizAnswer(selected, target, key) {
+            const feedbackBox = document.getElementById('quiz-feedback-box');
+            const feedbackText = document.getElementById('quiz-feedback-text');
+
+            const isCorrect = selected.id === target.id;
+
+            if (isCorrect) {
+                playSound('correct');
+                quizStreak++;
+                unlockPrefecture(target.id);
+                checkAchievement('first_win');
+
+                if (quizStreak >= 5) checkAchievement('streak_5');
+                if (quizStreak >= 10) checkAchievement('streak_10');
+
+                if (target.diff) {
+                    diffCorrectCount++;
+                    if (diffCorrectCount >= 3) checkAchievement('diff_master');
+                }
+
+                const pts = 50 + (quizStreak * 10);
+                addExp(pts);
+
+                feedbackText.className = "text-xs font-black text-emerald-600";
+                feedbackText.innerHTML = `🎉 大正解！ (${target.name} / 県庁: ${target.capital}) +${pts} EXP`;
+            } else {
+                playSound('wrong');
+                quizStreak = 0;
+                feedbackText.className = "text-xs font-black text-rose-500";
+                const correctAns = key === 'capital' ? target.capital : target.name;
+                feedbackText.innerHTML = `❌ 残念... 正解は「${correctAns}」！`;
+            }
+
+            document.getElementById('quiz-streak').textContent = `🔥 ${quizStreak}`;
+            feedbackBox.classList.remove('hidden');
+        }
+
+        function nextQuizQuestion() {
+            setupNextQuiz();
+        }
+
+        // --- ENCYCLOPEDIA & FILTERING ---
+        function filterRegion(region) {
+            currentRegionFilter = region;
+            document.querySelectorAll('.region-filter-btn').forEach(btn => {
+                btn.classList.remove('bg-emerald-600', 'text-white');
+                btn.classList.add('bg-white', 'text-slate-600');
+            });
+            if (event && event.target) {
+                event.target.classList.remove('bg-white', 'text-slate-600');
+                event.target.classList.add('bg-emerald-600', 'text-white');
+            }
+            renderBook();
+        }
+
+        function renderBook() {
+            const grid = document.getElementById('book-grid');
+            const query = document.getElementById('book-search').value.toLowerCase();
+            grid.innerHTML = '';
+
+            const filtered = prefectures.filter(p => {
+                const matchesRegion = currentRegionFilter === 'ALL' || p.region.includes(currentRegionFilter);
+                const matchesSearch = p.name.includes(query) || p.capital.includes(query) || p.goods.includes(query);
+                return matchesRegion && matchesSearch;
+            });
+
+            filtered.forEach(p => {
+                const isUnlocked = unlockedPrefs.has(p.id);
+                const card = document.createElement('div');
+                card.className = "glass-panel p-3 rounded-2xl border border-white/90 active:scale-95 transition cursor-pointer flex flex-col justify-between space-y-1.5";
+                card.onclick = () => openModal(p);
+
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-center mb-0.5">
+                            <span class="text-[9px] font-black px-1.5 py-0.2 rounded bg-sky-100 text-sky-700">${p.region}</span>
+                            ${isUnlocked ? '<i class="fa-solid fa-circle-check text-emerald-500 text-xs"></i>' : ''}
+                        </div>
+                        <h4 class="text-sm font-black text-slate-800">${p.name}</h4>
+                        <p class="text-[10px] font-extrabold text-emerald-600">県庁: ${p.capital}</p>
+                    </div>
+                    <div class="text-[9px] text-slate-500 bg-slate-50 p-1 rounded border border-slate-100 truncate">
+                        ${p.goods}
+                    </div>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        // --- ACHIEVEMENTS RENDERING ---
+        function renderBadges() {
+            const grid = document.getElementById('badges-grid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            achievementDefinitions.forEach(b => {
+                const isUnlocked = unlockedBadges.has(b.id);
+                const card = document.createElement('div');
+                card.className = `glass-panel p-3 rounded-2xl border text-center flex flex-col items-center justify-between space-y-1 ${isUnlocked ? 'bg-gradient-to-b from-white to-amber-50/60 border-amber-300' : 'badge-locked bg-slate-50'}`;
+
+                card.innerHTML = `
+                    <div class="text-2xl">${b.icon}</div>
+                    <div>
+                        <h4 class="text-xs font-black text-slate-800">${b.name}</h4>
+                        <p class="text-[9px] font-bold text-slate-400 leading-tight mt-0.5">${b.desc}</p>
+                    </div>
+                    <span class="text-[9px] font-black px-2 py-0.5 rounded-full ${isUnlocked ? 'bg-amber-400 text-amber-950' : 'bg-slate-200 text-slate-500'}">
+                        ${isUnlocked ? '獲得' : '未達'}
+                    </span>
+                `;
+
+                grid.appendChild(card);
+            });
+        }
+
+        // --- MODALS & TAB NAVIGATION ---
+        function openModal(pref) {
+            document.getElementById('modal-region').textContent = pref.region + "地方";
+            document.getElementById('modal-title').textContent = pref.name;
+            document.getElementById('modal-capital').textContent = pref.capital;
+            document.getElementById('modal-diff').textContent = pref.diff ? "⚠️ 県名と異なる" : "✓ 県名と同じ";
+            document.getElementById('modal-goods').textContent = pref.goods;
+            document.getElementById('modal-desc').textContent = pref.desc;
+
+            document.getElementById('pref-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('pref-modal').classList.add('hidden');
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
+            document.getElementById(`tab-${tab}`).classList.remove('hidden');
+
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('text-emerald-700', 'bg-emerald-50', 'border', 'border-emerald-200');
+                btn.classList.add('text-slate-500');
+            });
+
+            const activeBtn = document.getElementById(`nav-${tab}`);
+            activeBtn.classList.remove('text-slate-500');
+            activeBtn.classList.add('text-emerald-700', 'bg-emerald-50', 'border', 'border-emerald-200');
+
+            if (tab === 'badges') renderBadges();
+        }
+    </script>
+</body>
+</html>

@@ -228,7 +228,7 @@
                         <button onclick="zoomToRegion('中部')" class="zoom-btn whitespace-nowrap px-2.5 py-1 rounded-full bg-teal-500 text-white shadow-xs">中部</button>
                         <button onclick="zoomToRegion('近畿')" class="zoom-btn whitespace-nowrap px-2.5 py-1 rounded-full bg-amber-500 text-white shadow-xs">近畿</button>
                         <button onclick="zoomToRegion('中国')" class="zoom-btn whitespace-nowrap px-2.5 py-1 rounded-full bg-rose-500 text-white shadow-xs">中国・四国</button>
-                        <button onclick="zoomToRegion('九州')" class="zoom-btn whitespace-nowrap px-2.5 py-1 rounded-full bg-purple-500 text-white shadow-xs">九州・沖縄</button>
+                        <button onclick="zoomToRegion('九州・沖縄')" class="zoom-btn whitespace-nowrap px-2.5 py-1 rounded-full bg-purple-500 text-white shadow-xs">九州・沖縄</button>
                     </div>
 
                     <!-- Map Sub Toolbar -->
@@ -493,14 +493,16 @@
         // --- VIEWBOX PRESETS FOR REGION ZOOM ---
         const regionViewBoxes = {
             'ALL': '0 0 1000 850',
-            '北海道': '580 30 420 240',
-            '東北': '580 210 200 270',
+            '北海道': '570 20 430 250',
+            '東北': '570 200 230 280',
             '関東': '410 400 390 400',
-            '中部': '390 350 280 230',
-            '近畿': '330 480 190 160',
-            '中国': '150 410 240 210',
-            '四国': '210 530 190 140',
-            '九州': '0 520 360 320'
+            '中部': '380 340 300 320',
+            '近畿': '320 470 240 280',
+            '中国': '140 480 270 260',
+            '四国': '200 540 250 250',
+            '九州': '0 500 240 340',
+            '沖縄': '670 590 320 250',
+            '九州・沖縄': '0 480 1000 370'
         };
 
         // --- APP STATE ---

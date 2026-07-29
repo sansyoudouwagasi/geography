@@ -876,11 +876,34 @@
             card.classList.remove('hidden');
         }
 
+        // --- SVG SILHOUETTE VIEWBOX CALCULATOR ---
+        function getPathViewBox(dStr) {
+            const matches = dStr.match(/[-+]?\d*\.?\d+/g);
+            if (!matches) return "0 0 100 100";
+            const coords = matches.map(Number);
+            let minX = Infinity, maxX = -Infinity, minY = Infinity, maxY = -Infinity;
+            for (let i = 0; i < coords.length; i += 2) {
+                const x = coords[i];
+                const y = coords[i+1];
+                if (!isNaN(x) && !isNaN(y)) {
+                    if (x < minX) minX = x;
+                    if (x > maxX) maxX = x;
+                    if (y < minY) minY = y;
+                    if (y > maxY) maxY = y;
+                }
+            }
+            const width = (maxX - minX) || 10;
+            const height = (maxY - minY) || 10;
+            const padX = width * 0.15;
+            const padY = height * 0.15;
+            return `${minX - padX} ${minY - padY} ${width + padX * 2} ${height + padY * 2}`;
+        }
+
         // --- 4択クイズ LOGIC ---
         function setupNextQuiz() {
             document.getElementById('quiz-feedback-box').classList.add('hidden');
 
-            const quizType = Math.floor(Math.random() * 4);
+            const quizType = Math.floor(Math.random() * 5); // 0:県庁所在地, 1:特産, 2:異称, 3:地方/県庁, 4:白地図輪郭
             const target = prefectures[Math.floor(Math.random() * prefectures.length)];
             currentQuizPref = target;
 
@@ -890,6 +913,7 @@
             const visualContent = document.getElementById('quiz-visual-content');
 
             visualBox.classList.add('hidden');
+            visualContent.innerHTML = '';
 
             let options = [target];
             while (options.length < 4) {
@@ -906,7 +930,7 @@
                 categoryBadge.textContent = "🌾 特産品・地理特徴";
                 questionText.textContent = `「${target.goods.split(',')[0]}」などの特産を持つ都道府県は？`;
                 visualBox.classList.remove('hidden');
-                visualContent.textContent = target.name.charAt(0) + "❓";
+                visualContent.innerHTML = `<span class="text-3xl font-black text-emerald-600">${target.name.charAt(0)}❓</span>`;
                 renderQuizOptions(options, target, 'name');
             } else if (quizType === 2) {
                 const diffOnly = prefectures.filter(p => p.diff);
@@ -922,9 +946,23 @@
                 }
                 diffOptions.sort(() => Math.random() - 0.5);
                 renderQuizOptions(diffOptions, diffTarget, 'capital');
-            } else {
+            } else if (quizType === 3) {
                 categoryBadge.textContent = "🧩 ヒント・地方判定";
                 questionText.textContent = `「${target.region}地方」で県庁が「${target.capital}」の都道府県は？`;
+                renderQuizOptions(options, target, 'name');
+            } else {
+                categoryBadge.textContent = "🗺️ 白地図シルエット問題";
+                questionText.textContent = "この地形の輪郭（白地図）を持つ都道府県はどれ？";
+                visualBox.classList.remove('hidden');
+                
+                const viewBox = getPathViewBox(target.path);
+                visualContent.innerHTML = `
+                    <div class="w-36 h-36 bg-slate-900/90 rounded-2xl p-3 flex items-center justify-center border border-slate-700 shadow-inner my-1">
+                        <svg viewBox="${viewBox}" class="w-full h-full filter drop-shadow-[0_0_8px_rgba(56,189,248,0.7)]">
+                            <path d="${target.path}" fill="#38bdf8" stroke="#ffffff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
+                        </svg>
+                    </div>
+                `;
                 renderQuizOptions(options, target, 'name');
             }
 

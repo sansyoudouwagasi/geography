@@ -930,7 +930,7 @@
                 categoryBadge.textContent = "🌾 特産品・地理特徴";
                 questionText.textContent = `「${target.goods.split(',')[0]}」などの特産を持つ都道府県は？`;
                 visualBox.classList.remove('hidden');
-                visualContent.innerHTML = `<span class="text-3xl font-black text-emerald-600">${target.name.charAt(0)}❓</span>`;
+                visualContent.innerHTML = `<span class="text-4xl">❓</span>`;
                 renderQuizOptions(options, target, 'name');
             } else if (quizType === 2) {
                 const diffOnly = prefectures.filter(p => p.diff);

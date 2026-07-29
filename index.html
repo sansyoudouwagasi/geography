@@ -777,7 +777,8 @@
         }
 
         function pickNextMapTarget() {
-            const random = prefectures[Math.floor(Math.random() * prefectures.length)];
+            const candidates = prefectures.filter(p => p.id !== 47); // 沖縄県を出題から除外
+            const random = candidates[Math.floor(Math.random() * candidates.length)];
             mapTargetPref = random;
             
             const promptText = mapQuizMode === 'speed' 

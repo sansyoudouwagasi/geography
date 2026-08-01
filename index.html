@@ -141,7 +141,7 @@
         <header class="glass-panel p-3 rounded-2xl mb-2.5 shadow-sm">
             <div class="flex items-center justify-between gap-2">
                 <!-- App Title & Icon -->
-                <div class="flex items-center space-x-2" onclick="switchTab('map')">
+                <div class="flex items-center space-x-2 cursor-pointer active:scale-95 transition" onclick="switchTab('portal')">
                     <div class="w-8 h-8 rounded-xl bg-gradient-to-tr from-emerald-400 to-sky-500 text-white flex items-center justify-center shadow-sm text-base">
                         <i class="fa-solid fa-map-location-dot"></i>
                     </div>
@@ -177,8 +177,122 @@
         <!-- MAIN SCREEN CONTENT AREA -->
         <main class="flex-grow flex flex-col justify-between overflow-y-auto pb-2">
 
+            <!-- TAB 0: ポータル画面 (メインメニュー) -->
+            <section id="tab-portal" class="space-y-3 flex-grow flex flex-col justify-between overflow-y-auto">
+                <!-- ウェルカム ＆ 統計カード -->
+                <div class="glass-panel p-3.5 rounded-2xl bg-gradient-to-r from-emerald-500/10 via-sky-500/10 to-amber-500/10 border border-white/90 shadow-xs relative overflow-hidden">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <span class="text-[10px] font-black text-emerald-700 bg-emerald-100/90 px-2 py-0.5 rounded-full border border-emerald-200">
+                                ✨ 47都道府県マスター
+                            </span>
+                            <h2 class="text-lg font-black text-slate-800 mt-1 font-display">
+                                ZenGeos ポータル
+                            </h2>
+                            <p class="text-[11px] font-bold text-slate-600">モードを選んでチャレンジ！</p>
+                        </div>
+                        <div class="w-12 h-12 rounded-2xl bg-gradient-to-br from-emerald-400 to-sky-500 text-white flex items-center justify-center text-2xl shadow-md">
+                            🇯🇵
+                        </div>
+                    </div>
+                </div>
+
+                <!-- メニューボタンリスト (5大コンテンツ) -->
+                <div class="space-y-2 flex-grow flex flex-col justify-around">
+
+                    <!-- 1. 地理テスト -->
+                    <button onclick="switchTab('map')" class="w-full glass-panel p-3 rounded-2xl border border-white flex items-center justify-between hover:scale-[1.01] active:scale-95 transition group bg-gradient-to-r from-emerald-50/80 to-white shadow-xs">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 text-white flex items-center justify-center text-xl shadow-xs group-hover:rotate-6 transition-transform">
+                                🎯
+                            </div>
+                            <div class="text-left">
+                                <div class="flex items-center space-x-1.5">
+                                    <h3 class="text-sm font-black text-slate-800">地理テスト</h3>
+                                    <span class="text-[9px] font-black px-1.5 py-0.2 bg-emerald-100 text-emerald-800 rounded-md">地図タップ</span>
+                                </div>
+                                <p class="text-[10px] font-bold text-slate-500 mt-0.5">日本地図を直接タップして場所を当てる！</p>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-emerald-500 transition-colors text-xs pr-1"></i>
+                    </button>
+
+                    <!-- 2. 4択クイズ -->
+                    <button onclick="switchTab('quiz')" class="w-full glass-panel p-3 rounded-2xl border border-white flex items-center justify-between hover:scale-[1.01] active:scale-95 transition group bg-gradient-to-r from-sky-50/80 to-white shadow-xs">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-sky-500 to-blue-500 text-white flex items-center justify-center text-xl shadow-xs group-hover:rotate-6 transition-transform">
+                                ❓
+                            </div>
+                            <div class="text-left">
+                                <div class="flex items-center space-x-1.5">
+                                    <h3 class="text-sm font-black text-slate-800">4択クイズ</h3>
+                                    <span class="text-[9px] font-black px-1.5 py-0.2 bg-sky-100 text-sky-800 rounded-md">総合知識</span>
+                                </div>
+                                <p class="text-[10px] font-bold text-slate-500 mt-0.5">県庁所在地・特産品・異称の4択問題</p>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-sky-500 transition-colors text-xs pr-1"></i>
+                    </button>
+
+                    <!-- 3. シルエットクイズ (新設・独立) -->
+                    <button onclick="switchTab('silhouette')" class="w-full glass-panel p-3 rounded-2xl border border-white flex items-center justify-between hover:scale-[1.01] active:scale-95 transition group bg-gradient-to-r from-indigo-50/80 to-white shadow-xs relative overflow-hidden">
+                        <div class="absolute -right-2 -top-2 bg-gradient-to-r from-rose-500 to-amber-500 text-white text-[8px] font-black px-3 py-1 rotate-12 shadow-xs">
+                            NEW!
+                        </div>
+                        <div class="flex items-center space-x-3">
+                            <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-500 text-white flex items-center justify-center text-xl shadow-xs group-hover:rotate-6 transition-transform">
+                                🗺️
+                            </div>
+                            <div class="text-left">
+                                <div class="flex items-center space-x-1.5">
+                                    <h3 class="text-sm font-black text-slate-800">シルエットクイズ</h3>
+                                    <span class="text-[9px] font-black px-1.5 py-0.2 bg-indigo-100 text-indigo-800 rounded-md">独立モード</span>
+                                </div>
+                                <p class="text-[10px] font-bold text-slate-500 mt-0.5">白地図の形（輪郭）だけで都道府県を当てる！</p>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-indigo-500 transition-colors text-xs pr-1"></i>
+                    </button>
+
+                    <!-- 4. 47図鑑 -->
+                    <button onclick="switchTab('book')" class="w-full glass-panel p-3 rounded-2xl border border-white flex items-center justify-between hover:scale-[1.01] active:scale-95 transition group bg-gradient-to-r from-amber-50/80 to-white shadow-xs">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-amber-500 to-rose-400 text-white flex items-center justify-center text-xl shadow-xs group-hover:rotate-6 transition-transform">
+                                📖
+                            </div>
+                            <div class="text-left">
+                                <div class="flex items-center space-x-1.5">
+                                    <h3 class="text-sm font-black text-slate-800">47図鑑</h3>
+                                    <span class="text-[9px] font-black px-1.5 py-0.2 bg-amber-100 text-amber-800 rounded-md">データ閲覧</span>
+                                </div>
+                                <p class="text-[10px] font-bold text-slate-500 mt-0.5">全国47都道府県の県庁所在地や特産のデータベース</p>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-amber-500 transition-colors text-xs pr-1"></i>
+                    </button>
+
+                    <!-- 5. 実績 -->
+                    <button onclick="switchTab('badges')" class="w-full glass-panel p-3 rounded-2xl border border-white flex items-center justify-between hover:scale-[1.01] active:scale-95 transition group bg-gradient-to-r from-rose-50/80 to-white shadow-xs">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-rose-500 to-amber-500 text-white flex items-center justify-center text-xl shadow-xs group-hover:rotate-6 transition-transform">
+                                🏆
+                            </div>
+                            <div class="text-left">
+                                <div class="flex items-center space-x-1.5">
+                                    <h3 class="text-sm font-black text-slate-800">実績</h3>
+                                    <span class="text-[9px] font-black px-1.5 py-0.2 bg-rose-100 text-rose-800 rounded-md">バッジ集め</span>
+                                </div>
+                                <p class="text-[10px] font-bold text-slate-500 mt-0.5">ミッションをクリアしてトロフィーを獲得しよう！</p>
+                            </div>
+                        </div>
+                        <i class="fa-solid fa-chevron-right text-slate-300 group-hover:text-rose-500 transition-colors text-xs pr-1"></i>
+                    </button>
+
+                </div>
+            </section>
+
             <!-- TAB 1: スマホ位置当てテスト (SVG日本地図) -->
-            <section id="tab-map" class="space-y-2.5 flex-grow flex flex-col justify-between">
+            <section id="tab-map" class="hidden space-y-2.5 flex-grow flex flex-col justify-between">
                 
                 <!-- Game Control Banner -->
                 <div class="glass-panel p-3 rounded-2xl flex items-center justify-between gap-2 shadow-xs">
@@ -323,6 +437,59 @@
                 </div>
             </section>
 
+            <!-- TAB 2.5: シルエットクイズ (独立画面) -->
+            <section id="tab-silhouette" class="hidden space-y-3 flex-grow flex flex-col justify-between">
+                <div class="glass-panel rounded-2xl shadow-sm border border-white/80 overflow-hidden flex-grow flex flex-col justify-between">
+                    
+                    <!-- Progress Bar -->
+                    <div class="w-full bg-slate-100 h-1.5">
+                        <div id="silhouette-timer-bar" class="bg-gradient-to-r from-purple-500 via-indigo-500 to-rose-500 h-full w-full"></div>
+                    </div>
+
+                    <!-- Question Header -->
+                    <div class="px-4 py-2 border-b border-slate-100 flex justify-between items-center bg-white/50">
+                        <span class="text-[11px] font-black text-indigo-700 bg-indigo-50 px-2 py-0.5 rounded-md border border-indigo-200">
+                            🗺️ シルエット当てクイズ
+                        </span>
+                        <div class="flex items-center space-x-1.5">
+                            <span class="text-[10px] font-black text-slate-500">連続正解:</span>
+                            <span id="silhouette-streak" class="text-xs font-black text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full border border-indigo-200">
+                                🔥 0
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Silhouette View Box -->
+                    <div class="p-3 space-y-2 flex-grow flex flex-col justify-between items-center">
+                        <div class="text-center space-y-1">
+                            <h3 class="text-sm font-black text-slate-800">
+                                この地形の輪郭（シルエット）を持つ都道府県は？
+                            </h3>
+                        </div>
+
+                        <!-- Silhouette Image Window -->
+                        <div id="silhouette-visual-box" class="w-full max-w-[240px] aspect-square bg-slate-900/90 rounded-2xl p-4 flex items-center justify-center border border-slate-700 shadow-inner my-1 relative overflow-hidden">
+                            <div id="silhouette-svg-container" class="w-full h-full flex items-center justify-center">
+                                <!-- SVG injected via JS -->
+                            </div>
+                        </div>
+
+                        <!-- Options List -->
+                        <div id="silhouette-options-container" class="grid grid-cols-2 gap-2 w-full pt-1">
+                            <!-- Buttons injected via JS -->
+                        </div>
+                    </div>
+
+                    <!-- Feedback Footer -->
+                    <div id="silhouette-feedback-box" class="hidden px-4 py-3 border-t border-slate-100 text-center font-bold bg-slate-50/90">
+                        <p id="silhouette-feedback-text" class="text-sm mb-2"></p>
+                        <button onclick="nextSilhouetteQuestion()" class="w-full py-2.5 bg-indigo-600 active:bg-indigo-700 text-white font-extrabold rounded-xl text-xs transition shadow-sm">
+                            次のシルエット問題へ <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                </div>
+            </section>
+
             <!-- TAB 3: スマホ用47都道府県図鑑 -->
             <section id="tab-book" class="hidden space-y-2.5 flex-grow">
                 <!-- Search & Filter Bar -->
@@ -365,23 +532,31 @@
 
         </main>
 
-        <!-- スマホ用ボトムナビゲーションバー (押しやすい下部配置) -->
+        <!-- スマホ用ボトムナビゲーションバー (6ボタン配置) -->
         <nav class="glass-panel rounded-2xl p-1 shadow-sm mt-1">
-            <div class="flex justify-around text-[10px] font-black">
-                <button id="nav-map" onclick="switchTab('map')" class="nav-btn flex-1 py-1.5 px-1 rounded-xl text-emerald-700 bg-emerald-50 border border-emerald-200 flex flex-col items-center justify-center space-y-0.5">
-                    <i class="fa-solid fa-earth-japan text-sm text-emerald-600"></i>
-                    <span>地図テスト</span>
+            <div class="flex justify-around text-[9px] font-black gap-0.5">
+                <button id="nav-portal" onclick="switchTab('portal')" class="nav-btn flex-1 py-1.5 px-0.5 rounded-xl text-emerald-700 bg-emerald-50 border border-emerald-200 flex flex-col items-center justify-center space-y-0.5">
+                    <i class="fa-solid fa-house text-xs text-emerald-600"></i>
+                    <span>ホーム</span>
                 </button>
-                <button id="nav-quiz" onclick="switchTab('quiz')" class="nav-btn flex-1 py-1.5 px-1 rounded-xl text-slate-500 flex flex-col items-center justify-center space-y-0.5">
-                    <i class="fa-solid fa-pen-to-square text-sm text-sky-500"></i>
-                    <span>4択クイズ</span>
+                <button id="nav-map" onclick="switchTab('map')" class="nav-btn flex-1 py-1.5 px-0.5 rounded-xl text-slate-500 flex flex-col items-center justify-center space-y-0.5">
+                    <i class="fa-solid fa-earth-japan text-xs text-emerald-600"></i>
+                    <span>地理</span>
                 </button>
-                <button id="nav-book" onclick="switchTab('book')" class="nav-btn flex-1 py-1.5 px-1 rounded-xl text-slate-500 flex flex-col items-center justify-center space-y-0.5">
-                    <i class="fa-solid fa-book-open text-sm text-indigo-500"></i>
-                    <span>47図鑑</span>
+                <button id="nav-quiz" onclick="switchTab('quiz')" class="nav-btn flex-1 py-1.5 px-0.5 rounded-xl text-slate-500 flex flex-col items-center justify-center space-y-0.5">
+                    <i class="fa-solid fa-circle-question text-xs text-sky-500"></i>
+                    <span>4択</span>
                 </button>
-                <button id="nav-badges" onclick="switchTab('badges')" class="nav-btn flex-1 py-1.5 px-1 rounded-xl text-slate-500 flex flex-col items-center justify-center space-y-0.5">
-                    <i class="fa-solid fa-award text-sm text-amber-500"></i>
+                <button id="nav-silhouette" onclick="switchTab('silhouette')" class="nav-btn flex-1 py-1.5 px-0.5 rounded-xl text-slate-500 flex flex-col items-center justify-center space-y-0.5">
+                    <i class="fa-solid fa-draw-polygon text-xs text-indigo-500"></i>
+                    <span>影当て</span>
+                </button>
+                <button id="nav-book" onclick="switchTab('book')" class="nav-btn flex-1 py-1.5 px-0.5 rounded-xl text-slate-500 flex flex-col items-center justify-center space-y-0.5">
+                    <i class="fa-solid fa-book-open text-xs text-amber-500"></i>
+                    <span>図鑑</span>
+                </button>
+                <button id="nav-badges" onclick="switchTab('badges')" class="nav-btn flex-1 py-1.5 px-0.5 rounded-xl text-slate-500 flex flex-col items-center justify-center space-y-0.5">
+                    <i class="fa-solid fa-award text-xs text-rose-500"></i>
                     <span>実績</span>
                 </button>
             </div>
@@ -487,7 +662,9 @@
             { id: 'master_10', name: '10県制覇', desc: 'マスター度を10県以上にする', icon: '🗾' },
             { id: 'master_47', name: '全国完全制覇', desc: '47都道府県すべてをマスター', icon: '👑' },
             { id: 'level_5', name: 'ルーキー脱出', desc: 'プレイヤーレベル5に到達', icon: '🌟' },
-            { id: 'diff_master', name: '難関突破', desc: '県名と異なる県庁所在地クイズに3回正解', icon: '🎓' }
+            { id: 'diff_master', name: '難関突破', desc: '県名と異なる県庁所在地クイズに3回正解', icon: '🎓' },
+            { id: 'silhouette_1', name: '影の探求者', desc: 'シルエットクイズで正解する', icon: '👤' },
+            { id: 'silhouette_5', name: 'シルエットマスター', desc: 'シルエットクイズで5連続正解', icon: '🗺️' }
         ];
 
         // --- VIEWBOX PRESETS FOR REGION ZOOM ---
@@ -526,6 +703,9 @@
         let diffCorrectCount = 0;
         let currentRegionFilter = 'ALL';
         let showMapLabels = false;
+
+        let currentSilhouettePref = null;
+        let silhouetteStreak = 0;
 
         // --- SOUND EFFECTS ---
         function playSound(type) {
@@ -664,6 +844,7 @@
             renderMap();
             renderBook();
             setupNextQuiz();
+            switchTab('portal');
         });
 
         // --- SVG MAP RENDERING ---
@@ -903,7 +1084,7 @@
         function setupNextQuiz() {
             document.getElementById('quiz-feedback-box').classList.add('hidden');
 
-            const quizType = Math.floor(Math.random() * 5); // 0:県庁所在地, 1:特産, 2:異称, 3:地方/県庁, 4:白地図輪郭
+            const quizType = Math.floor(Math.random() * 4); // 0:県庁所在地, 1:特産, 2:異称, 3:地方/県庁
             const target = prefectures[Math.floor(Math.random() * prefectures.length)];
             currentQuizPref = target;
 
@@ -946,28 +1127,98 @@
                 }
                 diffOptions.sort(() => Math.random() - 0.5);
                 renderQuizOptions(diffOptions, diffTarget, 'capital');
-            } else if (quizType === 3) {
+            } else {
                 categoryBadge.textContent = "🧩 ヒント・地方判定";
                 questionText.textContent = `「${target.region}地方」で県庁が「${target.capital}」の都道府県は？`;
-                renderQuizOptions(options, target, 'name');
-            } else {
-                categoryBadge.textContent = "🗺️ 白地図シルエット問題";
-                questionText.textContent = "この地形の輪郭（白地図）を持つ都道府県はどれ？";
-                visualBox.classList.remove('hidden');
-                
-                const viewBox = getPathViewBox(target.path);
-                visualContent.innerHTML = `
-                    <div class="w-36 h-36 bg-slate-900/90 rounded-2xl p-3 flex items-center justify-center border border-slate-700 shadow-inner my-1">
-                        <svg viewBox="${viewBox}" class="w-full h-full filter drop-shadow-[0_0_8px_rgba(56,189,248,0.7)]">
-                            <path d="${target.path}" fill="#38bdf8" stroke="#ffffff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
-                        </svg>
-                    </div>
-                `;
                 renderQuizOptions(options, target, 'name');
             }
 
             const timerBar = document.getElementById('quiz-timer-bar');
             timerBar.style.width = '100%';
+        }
+
+        // --- 独立シルエットクイズ LOGIC ---
+        function startSilhouetteQuiz() {
+            silhouetteStreak = 0;
+            setupNextSilhouette();
+        }
+
+        function setupNextSilhouette() {
+            const feedbackBox = document.getElementById('silhouette-feedback-box');
+            if (feedbackBox) feedbackBox.classList.add('hidden');
+
+            const target = prefectures[Math.floor(Math.random() * prefectures.length)];
+            currentSilhouettePref = target;
+
+            const streakEl = document.getElementById('silhouette-streak');
+            if (streakEl) streakEl.textContent = `🔥 ${silhouetteStreak}`;
+
+            let options = [target];
+            while (options.length < 4) {
+                const rand = prefectures[Math.floor(Math.random() * prefectures.length)];
+                if (!options.find(o => o.id === rand.id)) options.push(rand);
+            }
+            options.sort(() => Math.random() - 0.5);
+
+            const viewBox = getPathViewBox(target.path);
+            const container = document.getElementById('silhouette-svg-container');
+            if (container) {
+                container.innerHTML = `
+                    <svg viewBox="${viewBox}" class="w-full h-full max-h-[190px] filter drop-shadow-[0_0_12px_rgba(129,140,248,0.9)]">
+                        <path d="${target.path}" fill="#818cf8" stroke="#ffffff" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" />
+                    </svg>
+                `;
+            }
+
+            const optContainer = document.getElementById('silhouette-options-container');
+            if (optContainer) {
+                optContainer.innerHTML = '';
+                options.forEach(opt => {
+                    const btn = document.createElement('button');
+                    btn.className = "p-3 bg-white/90 active:bg-indigo-50 border border-slate-200 rounded-xl font-extrabold text-slate-800 text-xs text-center transition shadow-xs hover:border-indigo-300 flex items-center justify-center space-x-1";
+                    btn.innerHTML = `<span>${opt.name}</span>`;
+                    btn.onclick = () => checkSilhouetteAnswer(opt, target);
+                    optContainer.appendChild(btn);
+                });
+            }
+        }
+
+        function checkSilhouetteAnswer(selected, target) {
+            const feedbackBox = document.getElementById('silhouette-feedback-box');
+            const feedbackText = document.getElementById('silhouette-feedback-text');
+
+            const isCorrect = selected.id === target.id;
+
+            if (isCorrect) {
+                playSound('correct');
+                silhouetteStreak++;
+                unlockPrefecture(target.id);
+                checkAchievement('first_win');
+                checkAchievement('silhouette_1');
+
+                if (silhouetteStreak >= 5) checkAchievement('silhouette_5');
+
+                const pts = 50 + (silhouetteStreak * 10);
+                addExp(pts);
+
+                feedbackText.className = "text-xs font-black text-emerald-600";
+                feedbackText.innerHTML = `🎉 大正解！これは「${target.name}」です！ (+${pts} EXP)`;
+                confetti({ particleCount: 50, spread: 60 });
+            } else {
+                playSound('wrong');
+                silhouetteStreak = 0;
+                feedbackText.className = "text-xs font-black text-rose-500";
+                feedbackText.innerHTML = `❌ 残念... 正解は「${target.name}」でした！`;
+            }
+
+            const streakEl = document.getElementById('silhouette-streak');
+            if (streakEl) streakEl.textContent = `🔥 ${silhouetteStreak}`;
+
+            if (feedbackBox) feedbackBox.classList.remove('hidden');
+        }
+
+        function nextSilhouetteQuestion() {
+            setupNextSilhouette();
         }
 
         function renderQuizOptions(options, target, key) {
@@ -1123,7 +1374,8 @@
 
         function switchTab(tab) {
             document.querySelectorAll('main > section').forEach(el => el.classList.add('hidden'));
-            document.getElementById(`tab-${tab}`).classList.remove('hidden');
+            const targetSection = document.getElementById(`tab-${tab}`);
+            if (targetSection) targetSection.classList.remove('hidden');
 
             document.querySelectorAll('.nav-btn').forEach(btn => {
                 btn.classList.remove('text-emerald-700', 'bg-emerald-50', 'border', 'border-emerald-200');
@@ -1131,10 +1383,13 @@
             });
 
             const activeBtn = document.getElementById(`nav-${tab}`);
-            activeBtn.classList.remove('text-slate-500');
-            activeBtn.classList.add('text-emerald-700', 'bg-emerald-50', 'border', 'border-emerald-200');
+            if (activeBtn) {
+                activeBtn.classList.remove('text-slate-500');
+                activeBtn.classList.add('text-emerald-700', 'bg-emerald-50', 'border', 'border-emerald-200');
+            }
 
             if (tab === 'badges') renderBadges();
+            if (tab === 'silhouette') startSilhouetteQuiz();
         }
     </script>
 </body>

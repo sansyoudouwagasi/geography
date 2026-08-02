@@ -958,7 +958,11 @@
         }
 
         function pickNextMapTarget() {
-            const candidates = prefectures.filter(p => p.id !== 47); // 沖縄県を出題から除外
+            let candidates = prefectures.filter(p => p.id !== 47); // 沖縄県を出題から除外
+            if (mapTargetPref) {
+                const filtered = candidates.filter(p => p.id !== mapTargetPref.id);
+                if (filtered.length > 0) candidates = filtered;
+            }
             const random = candidates[Math.floor(Math.random() * candidates.length)];
             mapTargetPref = random;
             
@@ -1085,7 +1089,23 @@
             document.getElementById('quiz-feedback-box').classList.add('hidden');
 
             const quizType = Math.floor(Math.random() * 4); // 0:県庁所在地, 1:特産, 2:異称, 3:地方/県庁
-            const target = prefectures[Math.floor(Math.random() * prefectures.length)];
+
+            let target;
+            if (quizType === 2) {
+                let diffCandidates = prefectures.filter(p => p.diff);
+                if (currentQuizPref) {
+                    const filtered = diffCandidates.filter(p => p.id !== currentQuizPref.id);
+                    if (filtered.length > 0) diffCandidates = filtered;
+                }
+                target = diffCandidates[Math.floor(Math.random() * diffCandidates.length)];
+            } else {
+                let candidates = prefectures;
+                if (currentQuizPref) {
+                    const filtered = candidates.filter(p => p.id !== currentQuizPref.id);
+                    if (filtered.length > 0) candidates = filtered;
+                }
+                target = candidates[Math.floor(Math.random() * candidates.length)];
+            }
             currentQuizPref = target;
 
             const categoryBadge = document.getElementById('quiz-category-badge');
@@ -1114,19 +1134,9 @@
                 visualContent.innerHTML = `<span class="text-4xl">❓</span>`;
                 renderQuizOptions(options, target, 'name');
             } else if (quizType === 2) {
-                const diffOnly = prefectures.filter(p => p.diff);
-                const diffTarget = diffOnly[Math.floor(Math.random() * diffOnly.length)];
-                currentQuizPref = diffTarget;
                 categoryBadge.textContent = "⚠️ 重要！県名と異なる県庁所在地";
-                questionText.textContent = `「${diffTarget.name}」の県庁所在地はどれ？`;
-                
-                let diffOptions = [diffTarget];
-                while(diffOptions.length < 4) {
-                    const r = prefectures[Math.floor(Math.random() * prefectures.length)];
-                    if(!diffOptions.find(o => o.id === r.id)) diffOptions.push(r);
-                }
-                diffOptions.sort(() => Math.random() - 0.5);
-                renderQuizOptions(diffOptions, diffTarget, 'capital');
+                questionText.textContent = `「${target.name}」の県庁所在地はどれ？`;
+                renderQuizOptions(options, target, 'capital');
             } else {
                 categoryBadge.textContent = "🧩 ヒント・地方判定";
                 questionText.textContent = `「${target.region}地方」で県庁が「${target.capital}」の都道府県は？`;
@@ -1147,7 +1157,12 @@
             const feedbackBox = document.getElementById('silhouette-feedback-box');
             if (feedbackBox) feedbackBox.classList.add('hidden');
 
-            const target = prefectures[Math.floor(Math.random() * prefectures.length)];
+            let candidates = prefectures;
+            if (currentSilhouettePref) {
+                const filtered = candidates.filter(p => p.id !== currentSilhouettePref.id);
+                if (filtered.length > 0) candidates = filtered;
+            }
+            const target = candidates[Math.floor(Math.random() * candidates.length)];
             currentSilhouettePref = target;
 
             const streakEl = document.getElementById('silhouette-streak');

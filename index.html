@@ -1159,7 +1159,7 @@
         function setupNextQuiz() {
             document.getElementById('quiz-feedback-box').classList.add('hidden');
 
-            const quizType = Math.floor(Math.random() * 4); // 0:県庁所在地, 1:特産, 2:異称, 3:地方/県庁
+            const quizType = Math.floor(Math.random() * 5); // 0:県庁所在地, 1:特産, 2:異称, 3:地方/県庁, 4:図鑑特徴・解説
 
             let target;
             if (quizType === 2) {
@@ -1208,9 +1208,15 @@
                 categoryBadge.textContent = "⚠️ 重要！県名と異なる県庁所在地";
                 questionText.textContent = `「${target.name}」の県庁所在地はどれ？`;
                 renderQuizOptions(options, target, 'capital');
-            } else {
+            } else if (quizType === 3) {
                 categoryBadge.textContent = "🧩 ヒント・地方判定";
                 questionText.textContent = `「${target.region}地方」で県庁が「${target.capital}」の都道府県は？`;
+                renderQuizOptions(options, target, 'name');
+            } else {
+                categoryBadge.textContent = "📖 47図鑑の特徴・解説";
+                questionText.textContent = `「${target.desc}」という特徴を持つ都道府県は？`;
+                visualBox.classList.remove('hidden');
+                visualContent.innerHTML = `<span class="text-3xl">📖</span>`;
                 renderQuizOptions(options, target, 'name');
             }
 

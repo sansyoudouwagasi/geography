@@ -882,7 +882,7 @@
         function setupNextQuiz() {
             document.getElementById('quiz-feedback-box').classList.add('hidden');
 
-            const quizType = Math.floor(Math.random() * 4);
+            const quizType = Math.floor(Math.random() * 5);
             const target = prefectures[Math.floor(Math.random() * prefectures.length)];
             currentQuizPref = target;
 
@@ -924,9 +924,15 @@
                 }
                 diffOptions.sort(() => Math.random() - 0.5);
                 renderQuizOptions(diffOptions, diffTarget, 'capital');
-            } else {
+            } else if (quizType === 3) {
                 categoryBadge.textContent = "🧩 ヒント・地方判定";
                 questionText.textContent = `「${target.region}地方」で県庁が「${target.capital}」の都道府県は？`;
+                renderQuizOptions(options, target, 'name');
+            } else {
+                categoryBadge.textContent = "📖 47図鑑の特徴・解説";
+                questionText.textContent = `「${target.desc}」という特徴を持つ都道府県は？`;
+                visualBox.classList.remove('hidden');
+                visualContent.textContent = "📖 特徴・解説";
                 renderQuizOptions(options, target, 'name');
             }
 

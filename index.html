@@ -80,8 +80,16 @@
             stroke-linecap: round;
         }
 
-        .pref-group:active .pref-path,
-        .pref-group:hover .pref-path {
+        @media (hover: hover) {
+            .pref-group:hover .pref-path {
+                fill: #38bdf8 !important;
+                stroke: #0284c7 !important;
+                stroke-width: 2.5;
+                filter: drop-shadow(0px 4px 10px rgba(56, 189, 248, 0.5));
+            }
+        }
+
+        .pref-group:active .pref-path {
             fill: #38bdf8 !important;
             stroke: #0284c7 !important;
             stroke-width: 2.5;
@@ -967,7 +975,21 @@
             pickNextMapTarget();
         }
 
+        function resetMapStyles() {
+            if (document.activeElement && typeof document.activeElement.blur === 'function') {
+                document.activeElement.blur();
+            }
+            prefectures.forEach(p => {
+                const pathEl = document.getElementById(`pref-path-${p.id}`);
+                if (pathEl) {
+                    pathEl.classList.remove('correct-flash', 'wrong-flash');
+                }
+            });
+        }
+
         function pickNextMapTarget() {
+            resetMapStyles();
+
             let candidates = prefectures.filter(p => p.id !== 47); // 沖縄県を出題から除外
             if (mapTargetPref) {
                 const filtered = candidates.filter(p => p.id !== mapTargetPref.id);
@@ -1041,6 +1063,10 @@
         }
 
         function handleMapClick(id) {
+            if (document.activeElement && typeof document.activeElement.blur === 'function') {
+                document.activeElement.blur();
+            }
+
             const pref = prefectures.find(p => p.id === id);
 
             if (mapQuizActive && mapTargetPref) {
@@ -1069,7 +1095,7 @@
 
                     setTimeout(() => {
                         hideCorrectSilhouette();
-                        if (pathEl) pathEl.classList.remove('correct-flash');
+                        resetMapStyles();
                         if (!showMapLabels && txtEl) txtEl.textContent = '';
                         pickNextMapTarget();
                     }, 500);
@@ -1078,7 +1104,7 @@
                     showMapToast(`❌ そこは【 ${pref.name} 】だよ！`, 'bg-rose-500 text-white');
                     if (pathEl) {
                         pathEl.classList.add('wrong-flash');
-                        setTimeout(() => pathEl.classList.remove('wrong-flash'), 650);
+                        setTimeout(() => resetMapStyles(), 650);
                     }
                 }
             } else {

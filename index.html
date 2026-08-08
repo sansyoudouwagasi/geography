@@ -976,9 +976,19 @@
             const random = candidates[Math.floor(Math.random() * candidates.length)];
             mapTargetPref = random;
             
-            const promptText = mapQuizMode === 'speed' 
-                ? `⚡ 「<span class="text-rose-600 font-black text-base underline decoration-wavy decoration-rose-400">${mapTargetPref.name}</span>」はどこ？`
-                : `「<span class="text-emerald-600 font-black text-base underline decoration-wavy decoration-emerald-400">${mapTargetPref.name}</span>」をタップ！`;
+            // 県名と県庁所在地名が異なる(diff===true)場合、約50%の確率で都市名（県庁所在地）を出題
+            const isCapitalQ = mapTargetPref.diff && Math.random() < 0.5;
+
+            let promptText = "";
+            if (isCapitalQ) {
+                promptText = mapQuizMode === 'speed' 
+                    ? `⚡ 県庁「<span class="text-rose-600 font-black text-base underline decoration-wavy decoration-rose-400">${mapTargetPref.capital}</span>」はどこ？`
+                    : `🏢 県庁が「<span class="text-emerald-600 font-black text-base underline decoration-wavy decoration-emerald-400">${mapTargetPref.capital}</span>」の都道府県をタップ！`;
+            } else {
+                promptText = mapQuizMode === 'speed' 
+                    ? `⚡ 「<span class="text-rose-600 font-black text-base underline decoration-wavy decoration-rose-400">${mapTargetPref.name}</span>」はどこ？`
+                    : `「<span class="text-emerald-600 font-black text-base underline decoration-wavy decoration-emerald-400">${mapTargetPref.name}</span>」をタップ！`;
+            }
 
             document.getElementById('map-target-prompt').innerHTML = promptText;
             document.getElementById('hint-box').classList.add('hidden');
@@ -1004,7 +1014,7 @@
             if (!mapTargetPref) return;
             const hintBox = document.getElementById('hint-box');
             const hintText = document.getElementById('hint-text');
-            hintText.textContent = `ヒント: ${mapTargetPref.region}地方 (県庁: ${mapTargetPref.capital})`;
+            hintText.textContent = `ヒント: ${mapTargetPref.region}地方 (県名: ${mapTargetPref.name} / 県庁: ${mapTargetPref.capital})`;
             hintBox.classList.remove('hidden');
         }
 

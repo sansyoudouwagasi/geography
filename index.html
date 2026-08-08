@@ -374,6 +374,16 @@
             </g>
 </g>
                         </svg>
+
+                        <!-- 正解シルエットオーバーレイポップアップ -->
+                        <div id="map-correct-silhouette-modal" class="absolute inset-0 bg-slate-900/60 backdrop-blur-xs z-30 flex flex-col items-center justify-center p-4 hidden transition-all duration-200 pointer-events-none">
+                            <div class="glass-panel bg-white/95 p-4 rounded-3xl flex flex-col items-center space-y-2 border border-white shadow-2xl scale-100 transition-transform">
+                                <span id="map-correct-pref-name" class="text-sm font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">正解！</span>
+                                <div id="map-correct-silhouette-svg" class="w-36 h-36 bg-slate-900/90 rounded-2xl p-3 flex items-center justify-center border border-slate-700 shadow-inner overflow-hidden">
+                                    <!-- SVG injected dynamically -->
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Toast Info Panel -->
@@ -998,6 +1008,28 @@
             hintBox.classList.remove('hidden');
         }
 
+        function showCorrectSilhouette(pref) {
+            const modal = document.getElementById('map-correct-silhouette-modal');
+            const svgContainer = document.getElementById('map-correct-silhouette-svg');
+            const nameEl = document.getElementById('map-correct-pref-name');
+
+            if (modal && svgContainer && nameEl) {
+                const viewBox = getPathViewBox(pref.path);
+                nameEl.textContent = `🎉 大正解！【${pref.name}】`;
+                svgContainer.innerHTML = `
+                    <svg viewBox="${viewBox}" class="w-full h-full max-h-[160px] filter drop-shadow-[0_0_12px_rgba(16,185,129,0.9)]">
+                        <path d="${pref.path}" fill="#10b981" stroke="#ffffff" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" />
+                    </svg>
+                `;
+                modal.classList.remove('hidden');
+            }
+        }
+
+        function hideCorrectSilhouette() {
+            const modal = document.getElementById('map-correct-silhouette-modal');
+            if (modal) modal.classList.add('hidden');
+        }
+
         function handleMapClick(id) {
             const pref = prefectures.find(p => p.id === id);
 
@@ -1023,11 +1055,14 @@
                     const txtEl = document.getElementById(`pref-text-${id}`);
                     if (txtEl) txtEl.textContent = pref.name.replace(/[都|府|県]/g, '');
 
+                    showCorrectSilhouette(pref);
+
                     setTimeout(() => {
+                        hideCorrectSilhouette();
                         if (pathEl) pathEl.classList.remove('correct-flash');
                         if (!showMapLabels && txtEl) txtEl.textContent = '';
                         pickNextMapTarget();
-                    }, 900);
+                    }, 500);
                 } else {
                     playSound('wrong');
                     showMapToast(`❌ そこは【 ${pref.name} 】だよ！`, 'bg-rose-500 text-white');

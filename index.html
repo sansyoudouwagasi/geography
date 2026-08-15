@@ -138,6 +138,39 @@
             filter: grayscale(1);
             opacity: 0.45;
         }
+
+        /* 正解時シルエット拡大アニメーション (0.1秒ごとに段階的に大きくなり0.5秒で最大化) */
+        @keyframes silhouetteGrow {
+            0% {
+                transform: scale(0.18);
+                opacity: 0.25;
+            }
+            20% { /* 0.1秒 */
+                transform: scale(0.38);
+                opacity: 0.6;
+            }
+            40% { /* 0.2秒 */
+                transform: scale(0.58);
+                opacity: 0.8;
+            }
+            60% { /* 0.3秒 */
+                transform: scale(0.78);
+                opacity: 0.92;
+            }
+            80% { /* 0.4秒 */
+                transform: scale(0.92);
+                opacity: 0.98;
+            }
+            100% { /* 0.5秒 */
+                transform: scale(1.0);
+                opacity: 1;
+            }
+        }
+
+        .animate-silhouette-grow {
+            animation: silhouetteGrow 0.5s cubic-bezier(0.2, 0.9, 0.3, 1) forwards;
+            transform-origin: center center;
+        }
     </style>
 </head>
 <body class="selection:bg-emerald-200">
@@ -384,10 +417,10 @@
                         </svg>
 
                         <!-- 正解シルエットオーバーレイポップアップ -->
-                        <div id="map-correct-silhouette-modal" class="absolute inset-0 bg-slate-900/60 backdrop-blur-xs z-30 flex flex-col items-center justify-center p-4 hidden transition-all duration-200 pointer-events-none">
-                            <div class="glass-panel bg-white/95 p-4 rounded-3xl flex flex-col items-center space-y-2 border border-white shadow-2xl scale-100 transition-transform">
-                                <span id="map-correct-pref-name" class="text-sm font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">正解！</span>
-                                <div id="map-correct-silhouette-svg" class="w-36 h-36 bg-slate-900/90 rounded-2xl p-3 flex items-center justify-center border border-slate-700 shadow-inner overflow-hidden">
+                        <div id="map-correct-silhouette-modal" class="absolute inset-0 bg-slate-900/60 backdrop-blur-xs z-30 flex flex-col items-center justify-center p-3 hidden transition-all duration-200 pointer-events-none">
+                            <div class="glass-panel bg-white/95 p-3 sm:p-4 rounded-3xl flex flex-col items-center space-y-2 border border-white shadow-2xl scale-100 transition-transform">
+                                <span id="map-correct-pref-name" class="text-sm font-black text-emerald-600 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200 shadow-xs">正解！</span>
+                                <div id="map-correct-silhouette-svg" class="w-64 h-64 sm:w-72 sm:h-72 bg-slate-900/90 rounded-2xl p-3 sm:p-4 flex items-center justify-center border border-slate-700 shadow-inner overflow-hidden">
                                     <!-- SVG injected dynamically -->
                                 </div>
                             </div>
@@ -1049,7 +1082,7 @@
                 const viewBox = getPathViewBox(pref.path);
                 nameEl.textContent = `🎉 大正解！【${pref.name}】`;
                 svgContainer.innerHTML = `
-                    <svg viewBox="${viewBox}" class="w-full h-full max-h-[160px] filter drop-shadow-[0_0_12px_rgba(16,185,129,0.9)]">
+                    <svg viewBox="${viewBox}" class="w-full h-full max-h-[260px] filter drop-shadow-[0_0_16px_rgba(16,185,129,0.95)] animate-silhouette-grow">
                         <path d="${pref.path}" fill="#10b981" stroke="#ffffff" stroke-width="2.5" stroke-linejoin="round" stroke-linecap="round" />
                     </svg>
                 `;

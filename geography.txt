@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>ZenGeos - 47都道府県マスター スマホ縦置き版</title>
+    <title>47都道府県マスター - スマホ縦置き版</title>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -179,10 +179,10 @@
                         <i class="fa-solid fa-map-location-dot"></i>
                     </div>
                     <div>
-                        <h1 class="text-lg font-black font-display bg-gradient-to-r from-emerald-600 to-sky-600 bg-clip-text text-transparent leading-none">
-                            ZenGeos
+                        <h1 class="text-base sm:text-lg font-black font-display bg-gradient-to-r from-emerald-600 to-sky-600 bg-clip-text text-transparent leading-none">
+                            47都道府県マスター
                         </h1>
-                        <span class="text-[9px] font-extrabold text-slate-400">47都道府県マスター</span>
+                        <span class="text-[9px] font-extrabold text-slate-400">日本地理クイズ＆図鑑</span>
                     </div>
                 </div>
 
